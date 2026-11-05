@@ -109,27 +109,30 @@ public class NetworkMenu : MonoBehaviour
         quickmatchCreating.interactable = false;
         quickmatchCreating.blocksRaycasts = false;
     }
+
     private void ConnectionFailed()
     {
         Debug.Log("No se pudo conectar a la partida.");
-
-        Show();
-
-        connectionError.alpha = 1;
-        connectionError.interactable = true;
-        connectionError.blocksRaycasts = true;
+        SetPanel(serverCreating, false);
+        SetPanel(serverJoining, false);
+        SetPanel(quickmatchCreating, false);
+        SetPanel(networkMenu, true);
+        SetPanel(connectionError, true);
     }
+
+
 
     public void CloseConnectionError()
     {
-        connectionError.alpha = 0;
-        connectionError.interactable = false;
-        connectionError.blocksRaycasts = false;
-
-        Show();
+        SetPanel(connectionError, false);
+        SetPanel(serverCreating, false);
+        SetPanel(serverJoining, false);
+        SetPanel(quickmatchCreating, false);
+        SetPanel(networkMenu, true);
         input.text = "";
         input.Select();
     }
+
 
     public void CreatingServer()
     {
