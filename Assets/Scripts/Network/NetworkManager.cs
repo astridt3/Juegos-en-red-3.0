@@ -1,0 +1,412 @@
+using Fusion;
+using Fusion.Sockets;
+using Photon.Voice.Fusion;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
+{
+    private FusionVoiceClient voiceClient;
+
+    public static event Action OnConnectedToGame;
+    public static event Action OnConnectionFailed;
+
+    [Header("Network components")]
+    [SerializeField] private NetworkSceneManagerDefault sceneManager;
+    [SerializeField] private NetworkRunner runner;
+
+    [Header("Player")]
+    [SerializeField] private NetworkPrefabRef playerPrefab;
+
+    [Header("Input")]
+    private InputSystemActions inputSystemActions;
+
+    [Header("Spawns")]
+    public Transform[] spawnPoints;
+
+    [Header("Network menu")]
+    public NetworkMenu netMenu;
+
+    [Header("Network pool")]
+    [SerializeField] private PooledNetworkObjectProvider objectProvider;
+
+    private void Awake()
+    {
+        voiceClient = GetComponent<FusionVoiceClient>();
+
+        runner.AddCallbacks(voiceClient);
+
+        runner.AddCallbacks(this);
+        inputSystemActions = new InputSystemActions();
+    }
+
+    private void OnEnable()
+    {
+        inputSystemActions.Enable();
+    }
+
+    private void OnDisable()
+    {
+        inputSystemActions.Disable();
+    }
+
+    #region Start game modes
+    public async void StartGameHost(string sessionName)
+    {
+        if (runner == null)
+        {
+            Debug.LogError("NetworkRunner no está inicializado.");
+            return;
+        }
+
+        runner.ProvideInput = true;
+        Debug.Log("Creando servidor...");
+        netMenu.CreatingServer();
+
+        StartGameResult result = await runner.StartGame(new StartGameArgs
+        {
+            GameMode = GameMode.Host,
+            SessionName = sessionName,
+            PlayerCount = 4,
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
+            SceneManager = sceneManager,
+            ObjectProvider = objectProvider
+        });
+
+        if (!result.Ok)
+        {
+            Debug.LogError("Error creando servidor: " + result.ShutdownReason);
+            OnConnectionFailed?.Invoke();
+            return;
+        }
+
+        Debug.Log("Servidor creado correctamente.");
+        netMenu.CreatingServerClose();
+        OnConnectedToGame?.Invoke();
+    }
+
+    public async void StartGameClient(string sessionName)
+    {
+        if (runner == null)
+        {
+            Debug.LogError("NetworkRunner no está inicializado.");
+            OnConnectionFailed?.Invoke();
+            return;
+        }
+
+        runner.ProvideInput = true;
+
+        Debug.Log("Conectando como cliente...");
+        netMenu.JoiningServer();
+
+        StartGameResult result = await runner.StartGame(new StartGameArgs
+        {
+            GameMode = GameMode.Client,
+            SessionName = sessionName,
+            PlayerCount = 4,
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
+            SceneManager = sceneManager,
+            ObjectProvider = objectProvider
+        });
+
+        if (!result.Ok)
+        {
+            Debug.LogError("Error conectando al servidor: " + result.ShutdownReason);
+            OnConnectionFailed?.Invoke();
+            return;
+        }
+
+        Debug.Log("Cliente conectado correctamente.");
+        netMenu.JoiningServerClose();
+        OnConnectedToGame?.Invoke();
+    }
+
+    public async void QuickPlay()
+    {
+        runner.ProvideInput = true;
+        StartGameResult result = await runner.StartGame(new StartGameArgs()
+        {
+            GameMode = GameMode.AutoHostOrClient,
+            PlayerCount = 4,
+            MatchmakingMode = Photon.Realtime.MatchmakingMode.FillRoom,
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
+            SceneManager = sceneManager,
+            ObjectProvider = objectProvider
+        });
+
+        if (!result.Ok)
+        {
+            Debug.LogError("Error conectando al servidor: " + result.ShutdownReason);
+            OnConnectionFailed?.Invoke();
+            return;
+        }
+
+        Debug.Log("Cliente conectado correctamente.");
+        netMenu.JoiningServerClose();
+        OnConnectedToGame?.Invoke();
+    }
+    #endregion
+
+    public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
+    {
+        if (runner.IsServer)
+        {
+            NetworkObject playerObject = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, player);
+
+            runner.SetPlayerObject(player, playerObject);
+
+            Debug.Log("Player " + player + " spawneado y asignado correctamente.");
+        }
+    }
+
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (!runner.IsServer)
+            return;
+
+        Debug.Log("Jugador desconectado: " + player);
+
+
+        TeamManager teamManager = FindFirstObjectByType<TeamManager>();
+
+        if (teamManager != null)
+        {
+            teamManager.RemoveDisconnectedPlayer(player);
+        }
+
+
+        NetworkObject playerObject = runner.GetPlayerObject(player);
+
+        if (playerObject != null)
+        {
+            Debug.Log("Despawneando personaje de " + player);
+
+            runner.Despawn(playerObject);
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró PlayerObject para " + player);
+        }
+    }
+
+// Advertencias de OnConnectedToServer y OnDisconnectedFromServer silenciadas
+#pragma warning disable UNT0006 // Incorrect message signature
+    public void OnConnectedToServer(NetworkRunner runner)
+    {
+        Debug.Log("Conectado al servidor.");
+    }
+
+    public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
+#pragma warning restore UNT0006 // Incorrect message signature
+    {
+        Debug.Log("Desconectado del servidor: " + reason);
+    }
+
+    public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
+    {
+        Debug.LogError("Falló la conexión: " + reason);
+    }
+
+    public async void ReturnToMainMenu()
+    {
+        if (runner != null && runner.IsRunning)
+        {
+            Debug.Log("Abandonando la sala...");
+            await runner.Shutdown();
+        }
+
+        Debug.Log("Cargando el menú principal localmente.");
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+
+    public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
+    {
+        Debug.Log("Network apagado: " + shutdownReason);
+    }
+
+    public void OnInput(NetworkRunner runner, NetworkInput input)
+    {
+        Vector2 direction = inputSystemActions.Gameplay.Move.ReadValue<Vector2>();
+
+        NetworkInputData data = new NetworkInputData
+        {
+            Direction = direction
+        };
+
+        if (UnityEngine.InputSystem.Keyboard.current.spaceKey.isPressed)
+        {
+            data.Buttons.Set(NetworkInputData.DashButton, true);
+        }
+
+        input.Set(data);
+    }
+
+    public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
+    {
+        // NO HAY INPUT DEL PLAYER TODAVÍA
+    }
+
+    public void LoadGameScene(int sceneIndex)
+    {
+        if (runner == null)
+        {
+            Debug.LogError("NetworkRunner no está inicializado.");
+            return;
+        }
+
+        if (!runner.IsSceneAuthority)
+        {
+            Debug.LogWarning("Solo el Host puede cargar la escena.");
+            return;
+        }
+
+        SceneRef scene = SceneRef.FromIndex(sceneIndex);
+
+        Debug.Log($"Host cargando escena {sceneIndex}");
+
+        runner.LoadScene(scene, LoadSceneMode.Single);
+    }
+
+    public void OnSceneLoadStart(NetworkRunner runner)
+    {
+        Debug.Log($"Fusion comenzó a cargar la escena");
+    }
+
+    public void OnSceneLoadDone(NetworkRunner runner)
+    {
+        Debug.Log("Escena cargada.");
+
+        int sceneIndex = SceneManager.GetActiveScene().buildIndex;
+
+        if (sceneIndex == 0)
+        {
+            //Esto corre en TODOS los peers (host y clientes).
+            NetworkMenu menu = FindFirstObjectByType<NetworkMenu>();
+            if (menu != null)
+            {
+                netMenu = menu;
+                menu.SetActiveRunner(runner);
+                menu.ShowTeamSelectionScreen();
+            }
+
+            MainMenu teamSelectPanel = FindFirstObjectByType<MainMenu>();
+            if (teamSelectPanel != null)
+            {
+                teamSelectPanel.ResetLocalSelection();
+            }
+
+            //Solo el server recrea/resetea a los jugadores en red.
+            if (runner.IsServer)
+            {
+                foreach (PlayerRef playerRef in runner.ActivePlayers)
+                {
+                    NetworkObject playerObject = runner.GetPlayerObject(playerRef);
+
+                    if (playerObject == null)
+                    {
+                        playerObject = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, playerRef);
+                        runner.SetPlayerObject(playerRef, playerObject);
+                    }
+
+                    Player playerComponent = playerObject.GetComponent<Player>();
+                    if (playerComponent != null)
+                    {
+                        playerComponent.Team = 0;
+                        playerComponent.IsAlive = true;
+                    }
+                }
+            }
+
+            return;
+        }
+
+        if (!runner.IsServer)
+            return;
+
+        GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag("PlayerSpawn");
+
+        if (spawnObjects.Length < 4)
+        {
+            Debug.LogError("La escena necesita 4 SpawnPoints con el tag PlayerSpawn.");
+            return;
+        }
+
+        TeamManager teamManager = TeamManager.Instance;
+
+        if (teamManager == null)
+        {
+            Debug.LogError("No se encontró TeamManager al cargar el nivel.");
+            return;
+        }
+
+        int spawnIndex = 0;
+
+        foreach (PlayerRef player in runner.ActivePlayers)
+        {
+            NetworkObject playerObject = runner.GetPlayerObject(player);
+            Transform spawnPoint = spawnObjects[spawnIndex].transform;
+
+            if (playerObject == null)
+            {
+                playerObject = runner.Spawn(playerPrefab, spawnPoint.position, spawnPoint.rotation, player);
+                runner.SetPlayerObject(player, playerObject);
+                Debug.Log("Player " + player + " creado en SpawnPoint " + spawnIndex);
+            }
+
+            playerObject.transform.SetPositionAndRotation(spawnPoint.position, spawnPoint.rotation);
+
+            byte team = (byte)teamManager.GetPlayerTeam(player);
+            Player playerComponent = playerObject.GetComponent<Player>();
+
+            if (playerComponent != null)
+            {
+                playerComponent.Team = team;
+                Debug.Log("Player " + player + " recuperó el Equipo " + team);
+            }
+
+            spawnIndex++;
+        }
+    }
+
+    public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj,PlayerRef player)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token)
+    {
+        request.Accept();
+    }
+
+    public void OnReliableDataReceived(NetworkRunner runner, PlayerRef player, ReliableKey key, ReadOnlySpan<byte> data)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnReliableDataProgress(NetworkRunner runner, PlayerRef player, ReliableKey key, float progress)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken)
+    {
+        throw new NotImplementedException();
+    }
+}
