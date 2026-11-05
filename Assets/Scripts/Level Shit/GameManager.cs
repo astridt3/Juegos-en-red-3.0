@@ -194,19 +194,38 @@ public class GameManager : NetworkBehaviour
     }
 
 
-    public void RestartLevel()
+    public void RestartLevel1()
     {
-        RestartLevelRpc();
+        RestartLevel1Rpc();
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void RestartLevelRpc()
+    private void RestartLevel1Rpc()
     {
-        Debug.Log("Reiniciando nivel.");
+        Debug.Log("Reiniciando nivel 1.");
 
         Runner.LoadScene(SceneRef.FromIndex(1));
     }
+    public void RestartLevel2()
+    {
+        RestartLevel2Rpc();
+    }
+    private void RestartLevel2Rpc()
+    {
+        Debug.Log("Reiniciando nivel 2.");
 
+        Runner.LoadScene(SceneRef.FromIndex(2));
+    }
+    public void RestartLevel3()
+    {
+        RestartLevel3Rpc();
+    }
+    private void RestartLevel3Rpc()
+    {
+        Debug.Log("Reiniciando nivel 3.");
+
+        Runner.LoadScene(SceneRef.FromIndex(3));
+    }
 
     public void ReturnToTeamSelection()
     {
