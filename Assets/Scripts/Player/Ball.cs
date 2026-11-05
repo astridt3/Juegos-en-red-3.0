@@ -23,6 +23,9 @@ public class Ball : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (owner == null || !owner.HasStateAuthority)
+            return;
+
         if (collision.CompareTag("Enemy"))
         {
             NetworkBehaviour enemy = collision.GetComponentInParent<NetworkBehaviour>();
@@ -37,12 +40,17 @@ public class Ball : MonoBehaviour
             return;
         }
 
-        if (collision.CompareTag("Player") && owner != null && owner.CanPvp)
+        if (collision.CompareTag("Player") && owner.CanPvp)
         {
-            Player target = collision.GetComponent<Player>();
+            Player target = collision.GetComponentInParent<Player>();
 
-            if (target != null)
+            if (target == null || target == owner)
+                return;
+
+            if (target.IsAlive)
+            {
                 target.Kill();
+            }
         }
     }
 }

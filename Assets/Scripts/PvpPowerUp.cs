@@ -10,7 +10,8 @@ public class PvpPowerUp : NetworkBehaviour
 
         if (collision.CompareTag("Player"))
         {
-            collision.GetComponent<Player>()?.ActivatePowerUp();
+            collision.GetComponent<Player>().ActivatePowerUp();
+
             Runner.Despawn(Object);
         }
     }
