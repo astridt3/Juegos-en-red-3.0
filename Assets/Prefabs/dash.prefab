@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2565062658630223346}
   - component: {fileID: 3233844509332558121}
   - component: {fileID: 2725977284437715623}
-  - component: {fileID: 1704584040995002865}
+  - component: {fileID: 2708100361604048277}
   m_Layer: 0
   m_Name: dash
   m_TagString: Untagged
@@ -198,8 +198,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!61 &1704584040995002865
-BoxCollider2D:
+--- !u!60 &2708100361604048277
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -228,7 +228,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -242,5 +242,34 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.089999996, y: -0.26999998}
+      - {x: 0.14999999, y: -0.22999999}
+      - {x: 0.21, y: -0.14999999}
+      - {x: 0.25, y: -0.13}
+      - {x: 0.31, y: -0.07}
+      - {x: 0.35999998, y: 0.01}
+      - {x: 0.35999998, y: 0.14}
+      - {x: 0.12, y: 0.14999999}
+      - {x: 0.17999999, y: 0.26}
+      - {x: 0.26, y: 0.39999998}
+      - {x: 0.26, y: 0.5}
+      - {x: 0.12, y: 0.5}
+      - {x: 0.089999996, y: 0.48999998}
+      - {x: 0.03, y: 0.41}
+      - {x: -0.01, y: 0.39}
+      - {x: -0.049999997, y: 0.35}
+      - {x: -0.099999994, y: 0.26}
+      - {x: -0.19, y: 0.21}
+      - {x: -0.26, y: 0.14}
+      - {x: -0.35999998, y: 0.03}
+      - {x: -0.35999998, y: -0.099999994}
+      - {x: -0.14, y: -0.11}
+      - {x: -0.22, y: -0.28}
+      - {x: -0.26, y: -0.38}
+      - {x: -0.26, y: -0.5}
+      - {x: -0.17999999, y: -0.5}
+      - {x: -0.14, y: -0.45999998}
+      - {x: -0.089999996, y: -0.45}
+  m_UseDelaunayMesh: 1
