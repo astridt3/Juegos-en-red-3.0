@@ -688,11 +688,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 6ec40fe0-fbb9-4076-8552-027b5462caaf
+  cloudProjectId: ebad0c73-0e31-4bbd-aa7b-f8c1ce53a824
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: Juegos-en-red-carrera 2026-09-08_18-22-37
-  organizationId: shadowkamiyuki
+  projectName: Juegos-en-red-carrera
+  organizationId: astridt3
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
