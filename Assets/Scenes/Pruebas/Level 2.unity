@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 178085599}
   - component: {fileID: 178085598}
   m_Layer: 0
-  m_Name: Main Camera (2)
+  m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -269,6 +269,7 @@ Transform:
   m_Children:
   - {fileID: 1466271778}
   - {fileID: 1825181056}
+  - {fileID: 1512994890}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &230320273
@@ -549,7 +550,7 @@ GameObject:
   m_Layer: 0
   m_Name: SpawnPoint3
   m_TagString: PlayerSpawn
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -5487077368411116049, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -659,7 +660,7 @@ GameObject:
   - component: {fileID: 807103540}
   - component: {fileID: 807103539}
   m_Layer: 0
-  m_Name: PowerUpDashSpawener (1)
+  m_Name: PowerUpDashSpawener
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -868,7 +869,7 @@ GameObject:
   - component: {fileID: 939520437}
   - component: {fileID: 939520436}
   m_Layer: 0
-  m_Name: PowerUp Spawner (1)
+  m_Name: PowerUp Spawner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1074,7 +1075,7 @@ GameObject:
   m_Layer: 0
   m_Name: SpawnPoint2
   m_TagString: PlayerSpawn
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -5487077368411116049, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1380,7 +1381,7 @@ GameObject:
   - component: {fileID: 1370287475}
   - component: {fileID: 1370287474}
   m_Layer: 5
-  m_Name: Canvas (1)
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1592,50 +1593,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1512994890}
-  - component: {fileID: 1512994889}
-  - component: {fileID: 1512994888}
+  - component: {fileID: 1512994891}
   m_Layer: 0
-  m_Name: Player spawn points
+  m_Name: SafeSpawnManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1512994888
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1512994887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkRunner
---- !u!114 &1512994889
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1512994887}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd7a56598255a774c9205233251fe4fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
-  sceneManager: {fileID: 0}
-  runner: {fileID: 1512994888}
-  playerPrefab:
-    RawGuidValue: f9bf01594be044245a9d13ddb9177949
-  spawnPoints:
-  - {fileID: 1971704907}
-  - {fileID: 1547723718}
-  - {fileID: 1118473760}
-  - {fileID: 700128743}
-  netMenu: {fileID: 0}
-  objectProvider: {fileID: 0}
 --- !u!4 &1512994890
 Transform:
   m_ObjectHideFlags: 0
@@ -1644,8 +1609,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1512994887}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1653,8 +1618,25 @@ Transform:
   - {fileID: 1547723718}
   - {fileID: 1118473760}
   - {fileID: 700128743}
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 178085602}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1512994891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1512994887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cf0fa6db026c5843a5ef088e33c6aa3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SafeSpawnManager
+  spawnPoints:
+  - {fileID: 1971704907}
+  - {fileID: 1547723718}
+  - {fileID: 1118473760}
+  - {fileID: 700128743}
 --- !u!1 &1547723717
 GameObject:
   m_ObjectHideFlags: 0
@@ -1667,7 +1649,7 @@ GameObject:
   m_Layer: 0
   m_Name: SpawnPoint1
   m_TagString: PlayerSpawn
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -5487077368411116049, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -1698,7 +1680,7 @@ GameObject:
   - component: {fileID: 1568174480}
   - component: {fileID: 1568174479}
   m_Layer: 0
-  m_Name: NetworkCameraController (1)
+  m_Name: NetworkCameraController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2061,7 +2043,7 @@ GameObject:
   - component: {fileID: 1940116924}
   - component: {fileID: 1940116923}
   m_Layer: 0
-  m_Name: GameManager (1)
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2131,7 +2113,7 @@ GameObject:
   m_Layer: 0
   m_Name: SpawnPoint0
   m_TagString: PlayerSpawn
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: -5487077368411116049, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -2295,7 +2277,7 @@ GameObject:
   - component: {fileID: 2015455470}
   - component: {fileID: 2015455469}
   m_Layer: 0
-  m_Name: EventSystem (1)
+  m_Name: EventSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2375,7 +2357,7 @@ GameObject:
   - component: {fileID: 2093957150}
   - component: {fileID: 2093957149}
   m_Layer: 0
-  m_Name: Finish Line (1)
+  m_Name: Finish Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2491,13 +2473,12 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1512994890}
+  - {fileID: 1370287477}
+  - {fileID: 178085602}
   - {fileID: 1568174481}
   - {fileID: 807103541}
   - {fileID: 2015455471}
   - {fileID: 1619848104}
   - {fileID: 1940116925}
   - {fileID: 939520438}
-  - {fileID: 1370287477}
-  - {fileID: 178085602}
   - {fileID: 2093957152}

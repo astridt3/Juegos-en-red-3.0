@@ -6,20 +6,7 @@ using UnityEngine.Networking;
 
 public class ProfileInfo : MonoBehaviour
 {
-    public string apiUrl = "https://jsonplaceholder.typicode.com";
-
-    private void Start()
-    {
-        StartCoroutine(GetProfile());
-        StartCoroutine(SendProfile(
-            JsonUtility.ToJson(new PlayerData
-    {
-                id = 1,
-                nickname = "Jugador1",
-                level = 10
-            })
-        ));
-    }
+    public string apiUrl = "";
     IEnumerator SendProfile(string json)
     {
         byte[] body = Encoding.UTF8.GetBytes(json);
@@ -41,6 +28,7 @@ public class ProfileInfo : MonoBehaviour
             Debug.Log("Datos recibidos: " + request.downloadHandler.text);
         }
     }
+
     IEnumerator GetProfile()
     {
         using UnityWebRequest request = UnityWebRequest.Get(apiUrl + "/users/1");

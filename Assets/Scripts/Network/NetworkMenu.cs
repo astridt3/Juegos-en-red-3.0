@@ -29,8 +29,6 @@ public class NetworkMenu : MonoBehaviour
 
     public void ShowTeamSelectionScreen()
     {
-        Debug.Log("Mostrando selección de equipos.");
-
         SetPanel(mainMenuPanel, false);
         Hide();
 
@@ -112,7 +110,6 @@ public class NetworkMenu : MonoBehaviour
 
     private void ConnectionFailed()
     {
-        Debug.Log("No se pudo conectar a la partida.");
         SetPanel(serverCreating, false);
         SetPanel(serverJoining, false);
         SetPanel(quickmatchCreating, false);
@@ -191,8 +188,6 @@ public class NetworkMenu : MonoBehaviour
 
     public void ShowLevelSelector()
     {
-        Debug.Log("CAMBIANDO AL PANEL DE NIVELES");
-
         // Ocultar equipos
         selectTeams.alpha = 0;
         selectTeams.interactable = false;
@@ -218,21 +213,10 @@ public class NetworkMenu : MonoBehaviour
         {
             waitingHostText.gameObject.SetActive(!isHost);
         }
-
-        if (isHost)
-        {
-            Debug.Log("SOY HOST -> puedo elegir nivel");
-        }
-        else
-        {
-            Debug.Log("SOY CLIENTE -> niveles bloqueados");
-        }
     }
 
     public void ShowMainMenu()
     {
-        Debug.Log("Volviendo al Main Menu.");
-
         SetPanel(mainMenuPanel, true);
         Hide();
 

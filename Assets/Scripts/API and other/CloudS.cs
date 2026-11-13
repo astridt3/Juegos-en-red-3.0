@@ -18,10 +18,6 @@ public class CloudS : MonoBehaviour
 
             Debug.Log("Autenticacion exitosa");
             Debug.Log("PlayerID: " + AuthenticationService.Instance.PlayerId);
-
-            Guardar();
-            Cargar();
-            MostrarPuntajePropio();
         }
         catch (System.Exception e)
         {

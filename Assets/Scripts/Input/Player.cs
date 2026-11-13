@@ -24,7 +24,6 @@ public class Player : NetworkBehaviour
     [Networked] public NetworkBool CanPvp { get; set; }
     [Networked] private float PowerUpEndTime { get; set; }
 
-
     // DASH POWER UP
     [Header("Dash")]
     [SerializeField] private float dashDuration = 10;
@@ -39,6 +38,8 @@ public class Player : NetworkBehaviour
     private Vector2 lastMovementDirection = Vector2.right;
 
     private int lastTeam = -1;
+
+    [Networked] public NetworkBool IsDisconnected { get; set; }
 
     public override void Spawned()
     {
@@ -70,19 +71,14 @@ public class Player : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        if (!IsAlive)
+        if (IsDisconnected || !IsAlive)
             return;
 
         if (GetInput(out NetworkInputData data))
         {
-            Vector2 movement = new Vector2(
-                data.Direction.x,
-                data.Direction.y
-            );
+            Vector2 movement = new Vector2(data.Direction.x, data.Direction.y);
 
-            transform.Translate(
-                movement * speed * Runner.DeltaTime
-            );
+            transform.Translate(movement * speed * Runner.DeltaTime);
 
             // Guardamos la última dirección en la que se movió
             if (movement != Vector2.zero)
@@ -96,8 +92,6 @@ public class Player : NetworkBehaviour
                 if (Runner.SimulationTime >= DashEndTime)
                 {
                     HasDash = false;
-
-                    Debug.Log("Dash Power Up terminado");
                 }
                 else
                 {
@@ -108,25 +102,19 @@ public class Player : NetworkBehaviour
                         Dash();
                     }
                 }
-
                 previousButtons = data.Buttons;
             }
         }
 
-
         if (CanPvp && Runner.SimulationTime >= PowerUpEndTime)
         {
             CanPvp = false;
-
-            Debug.Log("Power Up terminado");
         }
     }
 
     private void Dash()
     {
         transform.position += (Vector3)(lastMovementDirection * dashDistance);
-
-        Debug.Log("DASH!");
     }
 
     public void ActivateDash()
@@ -135,12 +123,8 @@ public class Player : NetworkBehaviour
             return;
 
         HasDash = true;
-
         DashEndTime = Runner.SimulationTime + dashDuration;
-
-        Debug.Log("Dash Power Up activado durante " + dashDuration + " segundos");
     }
-
 
     private void Update()
     {
@@ -160,7 +144,6 @@ public class Player : NetworkBehaviour
             dashTrail.emitting = HasDash;
         }
     }
-
     public void ActivatePowerUp()
     {
         if (!HasStateAuthority)
@@ -168,10 +151,7 @@ public class Player : NetworkBehaviour
 
         CanPvp = true;
         PowerUpEndTime = Runner.SimulationTime + powerUpDuration;
-
-        Debug.Log("Power Up activado");
     }
-
 
     private void UpdateColor()
     {
@@ -190,7 +170,6 @@ public class Player : NetworkBehaviour
         }
     }
 
-
     public void Kill()
     {
         if (!HasStateAuthority)
@@ -200,7 +179,21 @@ public class Player : NetworkBehaviour
             return;
 
         IsAlive = false;
+    }
 
-        Debug.Log("Jugador " + Object.InputAuthority + " murió.");
+    public float GetPvpTimeRemaining()
+    {
+        if (!CanPvp)
+            return 0f;
+
+        return Mathf.Max(0f, PowerUpEndTime - Runner.SimulationTime);
+    }
+
+    public float GetDashTimeRemaining()
+    {
+        if (!HasDash)
+            return 0f;
+
+        return Mathf.Max(0f, DashEndTime - Runner.SimulationTime);
     }
 }

@@ -338,6 +338,8 @@ MonoBehaviour:
   _HasDash:
     RawValue: 0
   dashTrail: {fileID: 0}
+  _IsDisconnected:
+    RawValue: 0
 --- !u!114 &7658017122763676522
 MonoBehaviour:
   m_ObjectHideFlags: 0
