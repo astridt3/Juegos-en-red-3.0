@@ -4,7 +4,6 @@ using Photon.Voice.Fusion;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -24,6 +23,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public static event Action OnConnectedToGame;
     public static event Action OnConnectionFailed;
+
+    public static event Action OnDisconnectedFromGame;
+    public static event Action OnReconnectedToGame;
 
     public NetworkConnectionState ConnectionState { get; private set; } = NetworkConnectionState.Disconnected;
 
@@ -48,6 +50,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("Reconnection")]
     [SerializeField] private float reconnectTimeout = 120f;
+    private string currentSessionName;
+    private bool isReconnecting;
+    private bool isStartingGame;
 
     private Dictionary<PlayerRef, string> connectedPlayers = new Dictionary<PlayerRef, string>();
     private Dictionary<string, PlayerReconnectData> disconnectedPlayers = new Dictionary<string, PlayerReconnectData>();
@@ -58,9 +63,16 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         voiceClient = GetComponent<FusionVoiceClient>();
 
-        runner.AddCallbacks(voiceClient);
+        if (runner == null)
+        {
+            Debug.LogError("[NetworkManager] No se ha asignado el NetworkRunner.");
+        }
 
-        runner.AddCallbacks(this);
+        if (voiceClient == null)
+        {
+            Debug.LogError("[NetworkManager] No se ha encontrado FusionVoiceClient.");
+        }
+
         inputSystemActions = new InputSystemActions();
     }
 
@@ -127,16 +139,18 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     private async Task StartGame(GameMode gameMode, string sessionName = null)
     {
-        if (runner == null)
-        {
-            SetConnectionState(NetworkConnectionState.Failed);
-            OnConnectionFailed?.Invoke();
+        if (runner == null || isStartingGame)
             return;
-        }
 
-        SetConnectionState(NetworkConnectionState.Connecting);
+        isStartingGame = true;
+
+        bool wasReconnecting = isReconnecting;
+
+        SetConnectionState(wasReconnecting ? NetworkConnectionState.Reconnecting : NetworkConnectionState.Connecting);
 
         runner.ProvideInput = true;
+
+        Debug.Log($"[NetworkManager] Iniciando conexión. Modo: {gameMode}");
 
         StartGameResult result = await runner.StartGame(new StartGameArgs
         {
@@ -151,10 +165,27 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (!result.Ok)
         {
+            Debug.LogError($"[NetworkManager] Error de conexión: {result.ShutdownReason}");
+
             SetConnectionState(NetworkConnectionState.Failed);
+
+            isReconnecting = false;
+
+            await RecreateRunner();
+
+            isStartingGame = false;
+
             OnConnectionFailed?.Invoke();
+
             return;
         }
+
+        isStartingGame = false;
+
+        // Guardar la sesión a la que estamos conectados.
+        currentSessionName = runner.SessionInfo.Name;
+
+        Debug.Log($"[NetworkManager] Conexión establecida con: {currentSessionName}");
 
         if (netMenu != null)
         {
@@ -162,8 +193,18 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             netMenu.JoiningServerClose();
         }
 
+        isReconnecting = false;
+
         SetConnectionState(NetworkConnectionState.Connected);
-        OnConnectedToGame?.Invoke();
+
+        if (wasReconnecting)
+        {
+            OnReconnectedToGame?.Invoke();
+        }
+        else
+        {
+            OnConnectedToGame?.Invoke();
+        }
     }
     #endregion
 
@@ -301,33 +342,64 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 #pragma warning disable UNT0006 // Incorrect message signature
     public void OnConnectedToServer(NetworkRunner runner)
     {
+        if (this.runner != runner)
+            return;
 
+        Debug.Log("[NetworkManager] Conectado al servidor.");
+
+        SetConnectionState(NetworkConnectionState.Connected);
     }
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
 #pragma warning restore UNT0006 // Incorrect message signature
     {
+        if (this.runner != runner)
+            return;
 
+        Debug.LogWarning($"[NetworkManager] Se perdió la conexión. Motivo: {reason}");
+
+        SetConnectionState(NetworkConnectionState.Disconnected);
+
+        OnDisconnectedFromGame?.Invoke();
     }
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
     {
+        if (this.runner != runner)
+            return;
 
+        Debug.LogError($"[NetworkManager] Error de conexión: {reason}");
     }
 
     public async void ReturnToMainMenu()
     {
-        if (runner != null && runner.IsRunning)
+        if (runner != null)
         {
-            await runner.Shutdown();
+            await RecreateRunner();
         }
+
+        currentSessionName = null;
+
+        isReconnecting = false;
+        isStartingGame = false;
+
+        SetConnectionState(NetworkConnectionState.Disconnected);
 
         SceneManager.LoadScene(0);
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
+        // Ignorar callbacks de runners que ya no son el actual.
+        if (this.runner != runner)
+            return;
 
+        Debug.Log($"[NetworkManager] Runner apagado. Motivo: {shutdownReason}");
+
+        if (ConnectionState != NetworkConnectionState.Failed && ConnectionState != NetworkConnectionState.Reconnecting)
+        {
+            SetConnectionState(NetworkConnectionState.Disconnected);
+        }
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
@@ -563,34 +635,94 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        // Obtener el SafeSpawnManager.
-        if (safeSpawnManager == null)
-        {
-            safeSpawnManager = FindFirstObjectByType<SafeSpawnManager>();
-        }
+        int currentScene = SceneManager.GetActiveScene().buildIndex;
 
-        // Colocar al jugador en el spawn actual de la cámara.
-        if (safeSpawnManager == null || !safeSpawnManager.TryGetSpawnPosition(reconnectData.SpawnIndex, out Vector3 spawnPosition))
+        // En escenas de partida intentamos recuperar el spawn.
+        if (currentScene != 0)
         {
-            Debug.LogError("No se pudo recuperar el spawn point del jugador.");
-            return;
-        }
+            if (safeSpawnManager == null)
+            {
+                safeSpawnManager = FindFirstObjectByType<SafeSpawnManager>();
+            }
 
-        playerObject.transform.position = spawnPosition;
+            if (safeSpawnManager != null && safeSpawnManager.TryGetSpawnPosition(reconnectData.SpawnIndex,out Vector3 spawnPosition))
+            {
+                playerObject.transform.position = spawnPosition;
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró un spawn válido. Se conserva la posición anterior.");
+            }
+        }
 
         // Recuperar el procesamiento del jugador.
-        // IsAlive y Team permanecen intactos.
         playerComponent.IsDisconnected = false;
 
-        // Asignar la autoridad al nuevo cliente.
+        // Recuperar autoridad.
         playerObject.AssignInputAuthority(newPlayer);
 
-        // Registrar el objeto para el nuevo PlayerRef.
+        // Asociar el objeto al nuevo PlayerRef.
         runner.SetPlayerObject(newPlayer, playerObject);
+
+        // Registrar nuevamente su identidad.
+        connectedPlayers[newPlayer] = reconnectData.PlayerId;
 
         // Eliminar la reserva.
         disconnectedPlayers.Remove(reconnectData.PlayerId);
 
         Debug.Log($"Jugador recuperado: {reconnectData.PlayerId} | " + $"Equipo: {playerComponent.Team} | " + $"Vivo: {playerComponent.IsAlive}");
+    }
+
+    private async Task RecreateRunner()
+    {
+        NetworkRunner oldRunner = runner;
+
+        if (oldRunner != null)
+        {
+            // Desvincular el Runner anterior.
+            runner = null;
+
+            if (oldRunner.IsRunning)
+            {
+                Debug.Log("[NetworkManager] Apagando Runner anterior.");
+                await oldRunner.Shutdown();
+            }
+
+            Destroy(oldRunner);
+
+            // Esperar al siguiente ciclo de Unity.
+            await Task.Yield();
+        }
+
+        // Crear un Runner nuevo.
+        runner = gameObject.AddComponent<NetworkRunner>();
+
+        Debug.Log("[NetworkManager] Nuevo NetworkRunner preparado.");
+    }
+
+    public async void ReconnectToGame()
+    {
+        if (isReconnecting || isStartingGame)
+            return;
+
+        if (string.IsNullOrEmpty(currentSessionName))
+        {
+            Debug.LogError("[NetworkManager] No existe una sesión guardada para reconectar.");
+
+            OnConnectionFailed?.Invoke();
+            return;
+        }
+
+        isReconnecting = true;
+
+        SetConnectionState(NetworkConnectionState.Reconnecting);
+
+        Debug.Log($"[NetworkManager] Reconectando a la sesión: {currentSessionName}");
+
+        // Reemplazar el Runner anterior.
+        await RecreateRunner();
+
+        // Entrar nuevamente como cliente.
+        await StartGame(GameMode.Client, currentSessionName);
     }
 }

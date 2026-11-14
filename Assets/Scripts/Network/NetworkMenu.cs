@@ -57,12 +57,16 @@ public class NetworkMenu : MonoBehaviour
     {
         NetworkManager.OnConnectedToGame += ConnectedToGame;
         NetworkManager.OnConnectionFailed += ConnectionFailed;
+        NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
+        NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
     }
 
     private void OnDisable()
     {
         NetworkManager.OnConnectedToGame -= ConnectedToGame;
         NetworkManager.OnConnectionFailed -= ConnectionFailed;
+        NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
+        NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
     }
 
     private void ConnectedToGame()
@@ -92,6 +96,7 @@ public class NetworkMenu : MonoBehaviour
 
         networkManager.StartGameClient(input.text);
     }
+
     public void QuickPlay()
     {
         networkManager.QuickPlay();
@@ -100,6 +105,7 @@ public class NetworkMenu : MonoBehaviour
         quickmatchCreating.interactable = true;
         quickmatchCreating.blocksRaycasts = true;
     }
+
     public void QuickPlayClose()
     {
         Show();
@@ -117,19 +123,48 @@ public class NetworkMenu : MonoBehaviour
         SetPanel(connectionError, true);
     }
 
-
-
     public void CloseConnectionError()
     {
         SetPanel(connectionError, false);
         SetPanel(serverCreating, false);
         SetPanel(serverJoining, false);
         SetPanel(quickmatchCreating, false);
+
         SetPanel(networkMenu, true);
+
         input.text = "";
         input.Select();
     }
 
+    private void DisconnectedFromGame()
+    {
+        Debug.Log("Se perdió la conexión con la partida.");
+
+        SetPanel(serverCreating, false);
+        SetPanel(serverJoining, false);
+        SetPanel(quickmatchCreating, false);
+
+        SetPanel(connectionError, true);
+        SetPanel(networkMenu, true);
+    }
+
+    private void ReconnectedToGame()
+    {
+        Debug.Log("Reconexión completada.");
+
+        SetPanel(connectionError, false);
+        SetPanel(networkMenu, false);
+    }
+
+    public void Reconnect()
+    {
+        Debug.Log("Solicitando reconexión...");
+
+        SetPanel(connectionError, false);
+        SetPanel(networkMenu, false);
+
+        networkManager.ReconnectToGame();
+    }
 
     public void CreatingServer()
     {
@@ -138,6 +173,7 @@ public class NetworkMenu : MonoBehaviour
         serverCreating.interactable = true;
         serverCreating.blocksRaycasts = true;
     }
+
     public void CreatingServerClose()
     {
         Show();
@@ -145,6 +181,7 @@ public class NetworkMenu : MonoBehaviour
         serverCreating.interactable = false;
         serverCreating.blocksRaycasts = false;
     }
+
     public void JoiningServer()
     {
         Hide();
@@ -152,6 +189,7 @@ public class NetworkMenu : MonoBehaviour
         serverJoining.interactable = true;
         serverJoining.blocksRaycasts = true;
     }
+
     public void JoiningServerClose()
     {
         Show();
@@ -159,6 +197,7 @@ public class NetworkMenu : MonoBehaviour
         serverJoining.interactable = false;
         serverJoining.blocksRaycasts = false;
     }
+
     public void Hide()
     {
         networkMenu.alpha = 0;
