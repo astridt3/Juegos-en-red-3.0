@@ -193,7 +193,6 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-
     public void RestartLevel1()
     {
         RestartLevel1Rpc();

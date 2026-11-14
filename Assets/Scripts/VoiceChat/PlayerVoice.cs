@@ -31,24 +31,12 @@ public class PlayerVoice : NetworkBehaviour
 
         recorder.InterestGroup = 0;
         recorder.TransmitEnabled = true;
-        recorder.RecordingEnabled = true;
-
-        //Debug.Log("Recorder encontrado.");
-        //Debug.Log("Fuente de audio: " + recorder.SourceType);
-        //Debug.Log("Grabación habilitada: " + recorder.RecordingEnabled);
-        //Debug.Log("Transmisión habilitada: " + recorder.TransmitEnabled);
-        //Debug.Log("RecordingEnabled: " + recorder.RecordingEnabled);
-        //Debug.Log("TransmitEnabled: " + recorder.TransmitEnabled);
-        //Debug.Log("SourceType: " + recorder.SourceType);
-        //Debug.Log("MicrophoneType: " + recorder.MicrophoneType);
-        //Debug.Log("RecordWhenJoined: " + recorder.RecordWhenJoined);        
+        recorder.RecordingEnabled = true;     
     }
 
     private void Update()
     {
         if (recorder == null)
             return;
-
-        //Debug.Log("Grabando: " + recorder.IsCurrentlyTransmitting);
     }
 }
