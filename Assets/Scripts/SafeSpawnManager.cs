@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class SafeSpawnManager : MonoBehaviour
@@ -7,16 +8,29 @@ public class SafeSpawnManager : MonoBehaviour
 
     public int SpawnCount => spawnPoints != null ? spawnPoints.Length : 0;
 
-    public bool TryGetSpawnPosition(int index, out Vector3 position)
+    public bool TryGetSpawnTransform(int index, out Transform spawn)
     {
-        position = Vector3.zero;
+        spawn = null;
 
         if (spawnPoints == null || index < 0 || index >= spawnPoints.Length || spawnPoints[index] == null)
         {
             return false;
         }
 
-        position = spawnPoints[index].position;
+        spawn = spawnPoints[index];
+
+        return true;
+    }
+
+    public bool TryGetSpawnPosition(int index, out Vector3 position)
+    {
+        position = Vector3.zero;
+
+        if (!TryGetSpawnTransform(index, out Transform spawn))
+            return false;
+
+        position = spawn.position;
+
         return true;
     }
 }

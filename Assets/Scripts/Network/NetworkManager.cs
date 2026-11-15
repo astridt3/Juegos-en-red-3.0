@@ -68,10 +68,14 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             Debug.LogError("[NetworkManager] No se ha asignado el NetworkRunner.");
         }
 
+        runner.AddCallbacks(this);
+
         if (voiceClient == null)
         {
             Debug.LogError("[NetworkManager] No se ha encontrado FusionVoiceClient.");
         }
+
+        runner.AddCallbacks(voiceClient);
 
         inputSystemActions = new InputSystemActions();
     }
@@ -225,33 +229,33 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         string playerId = GetPlayerId(runner, player);
 
+        Debug.Log($"[JOIN] PlayerRef: {player} | Identity: {playerId}");
+
         if (string.IsNullOrEmpty(playerId))
         {
-            Debug.LogWarning($"Jugador {player} conectado sin ConnectionToken.");
+            Debug.LogWarning("Jugador conectado sin ConnectionToken.");
             return;
         }
 
         connectedPlayers[player] = playerId;
 
-        // ¿Es un jugador que está regresando?
-        if (disconnectedPlayers.TryGetValue(
-            playerId,
-            out PlayerReconnectData reconnectData))
+        if (disconnectedPlayers.TryGetValue(playerId, out PlayerReconnectData data))
         {
-            float elapsedTime = Time.time - reconnectData.DisconnectTime;
+            Debug.Log("[JOIN] Se detectó un jugador que está reconectando.");
 
-            if (elapsedTime < reconnectTimeout)
+            float elapsed = Time.time - data.DisconnectTime;
+
+            if (elapsed < reconnectTimeout)
             {
-                ReconnectPlayer(runner, player, reconnectData);
+                ReconnectPlayer(runner, player, data);
                 return;
             }
-
-            Debug.Log($"Tiempo de reconexión agotado: {playerId}");
 
             ReleaseDisconnectedPlayer(runner, playerId);
         }
 
-        // Jugador nuevo.
+        Debug.Log("[JOIN] Se creará un personaje nuevo.");
+
         SpawnPlayer(runner, player);
     }
 
@@ -506,10 +510,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         if (!runner.IsServer)
             return;
 
-        GameObject[] spawnObjects = GameObject.FindGameObjectsWithTag("PlayerSpawn");
-
-        if (spawnObjects.Length < 4)
+        if (safeSpawnManager.SpawnCount < 4)
         {
+            Debug.LogError("No hay suficientes puntos de aparición.");
             return;
         }
 
@@ -524,19 +527,27 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         foreach (PlayerRef player in runner.ActivePlayers)
         {
-            if (spawnIndex >= spawnObjects.Length)
+            if (spawnIndex >= safeSpawnManager.SpawnCount)
             {
                 Debug.LogWarning("No quedan spawn points disponibles.");
                 break;
             }
 
-            NetworkObject playerObject = runner.GetPlayerObject(player);
+            if (!safeSpawnManager.TryGetSpawnTransform(
+                spawnIndex,
+                out Transform spawnPoint))
+            {
+                Debug.LogWarning($"Spawn inválido en índice {spawnIndex}.");
+                spawnIndex++;
+                continue;
+            }
 
-            Transform spawnPoint = spawnObjects[spawnIndex].transform;
+            NetworkObject playerObject = runner.GetPlayerObject(player);
 
             if (playerObject == null)
             {
                 playerObject = runner.Spawn(playerPrefab, spawnPoint.position, spawnPoint.rotation, player);
+
                 runner.SetPlayerObject(player, playerObject);
             }
 
@@ -551,7 +562,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
                 playerComponent.Team = team;
             }
 
-            // Registrar la identidad y su spawn asignado.
             if (connectedPlayers.TryGetValue(player, out string playerId))
             {
                 playerSpawnAssignments[playerId] = spawnIndex;
@@ -619,11 +629,12 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (playerObject == null)
         {
-            Debug.LogWarning("El objeto reservado ya no existe.");
+            Debug.LogWarning("[Reconnect] El objeto reservado no existe. Creando uno nuevo.");
 
             disconnectedPlayers.Remove(reconnectData.PlayerId);
 
             SpawnPlayer(runner, newPlayer);
+
             return;
         }
 
@@ -631,46 +642,57 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (playerComponent == null)
         {
-            Debug.LogError("El objeto recuperado no contiene Player.");
+            Debug.LogError("[Reconnect] El objeto no contiene Player.");
             return;
         }
 
+        // Recuperar el equipo antes de actualizar las referencias.
+        byte previousTeam = playerComponent.Team;
+
+        // Recuperar posición en la escena actual.
         int currentScene = SceneManager.GetActiveScene().buildIndex;
 
-        // En escenas de partida intentamos recuperar el spawn.
         if (currentScene != 0)
         {
             if (safeSpawnManager == null)
-            {
                 safeSpawnManager = FindFirstObjectByType<SafeSpawnManager>();
-            }
 
-            if (safeSpawnManager != null && safeSpawnManager.TryGetSpawnPosition(reconnectData.SpawnIndex,out Vector3 spawnPosition))
+            if (safeSpawnManager != null && safeSpawnManager.TryGetSpawnTransform(reconnectData.SpawnIndex, out Transform spawnPoint))
             {
-                playerObject.transform.position = spawnPosition;
+                playerObject.transform.SetPositionAndRotation(spawnPoint.position, spawnPoint.rotation);
+
+                Debug.Log($"[Reconnect] Spawn recuperado: {reconnectData.SpawnIndex}");
             }
             else
             {
-                Debug.LogWarning("No se encontró un spawn válido. Se conserva la posición anterior.");
+                Debug.LogWarning($"[Reconnect] No se encontró el spawn {reconnectData.SpawnIndex}. " + "Se conserva la posición anterior.");
             }
         }
 
-        // Recuperar el procesamiento del jugador.
+        // Recuperar el estado del personaje.
         playerComponent.IsDisconnected = false;
 
-        // Recuperar autoridad.
+        // Recuperar autoridad de entrada.
         playerObject.AssignInputAuthority(newPlayer);
 
-        // Asociar el objeto al nuevo PlayerRef.
+        // Asociar el personaje al nuevo PlayerRef.
         runner.SetPlayerObject(newPlayer, playerObject);
 
-        // Registrar nuevamente su identidad.
+        // Actualizar referencias del sistema de equipos.
+        TeamManager teamManager = TeamManager.Instance;
+
+        if (teamManager != null)
+        {
+            teamManager.ReplacePlayerRef(reconnectData.PreviousPlayerRef, newPlayer);
+        }
+
+        // Recuperar identidad.
         connectedPlayers[newPlayer] = reconnectData.PlayerId;
 
-        // Eliminar la reserva.
+        // Eliminar reserva.
         disconnectedPlayers.Remove(reconnectData.PlayerId);
 
-        Debug.Log($"Jugador recuperado: {reconnectData.PlayerId} | " + $"Equipo: {playerComponent.Team} | " + $"Vivo: {playerComponent.IsAlive}");
+        Debug.Log($"[Reconnect] Jugador recuperado: {reconnectData.PlayerId} | " + $"Nuevo PlayerRef: {newPlayer} | " + $"Equipo: {previousTeam}");
     }
 
     private async Task RecreateRunner()
@@ -696,6 +718,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         // Crear un Runner nuevo.
         runner = gameObject.AddComponent<NetworkRunner>();
+        runner.AddCallbacks(this);
 
         Debug.Log("[NetworkManager] Nuevo NetworkRunner preparado.");
     }
@@ -724,5 +747,12 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         // Entrar nuevamente como cliente.
         await StartGame(GameMode.Client, currentSessionName);
+    }
+
+    private void ClearReconnectData()
+    {
+        connectedPlayers.Clear();
+        disconnectedPlayers.Clear();
+        playerSpawnAssignments.Clear();
     }
 }
