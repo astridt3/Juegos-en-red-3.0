@@ -7,6 +7,8 @@ public class PlayerVoice : NetworkBehaviour
 {
     private VoiceNetworkObject voiceNetworkObject;
     private Recorder recorder;
+    private FusionVoiceClient voiceClient;
+    private Player player;
 
     public override void Spawned()
     {
@@ -14,6 +16,7 @@ public class PlayerVoice : NetworkBehaviour
             return;
 
         voiceNetworkObject = GetComponent<VoiceNetworkObject>();
+        voiceClient = FindFirstObjectByType<FusionVoiceClient>();
 
         if (voiceNetworkObject == null)
         {
@@ -29,7 +32,14 @@ public class PlayerVoice : NetworkBehaviour
             return;
         }
 
-        recorder.InterestGroup = 0;
+        player = GetComponent<Player>();
+
+        if (player == null)
+        {
+            Debug.LogError("No se encontro el componente: Player");
+            return;
+        }
+
         recorder.TransmitEnabled = true;
         recorder.RecordingEnabled = true;
 
@@ -42,6 +52,15 @@ public class PlayerVoice : NetworkBehaviour
         //Debug.Log("SourceType: " + recorder.SourceType);
         //Debug.Log("MicrophoneType: " + recorder.MicrophoneType);
         //Debug.Log("RecordWhenJoined: " + recorder.RecordWhenJoined);        
+    }
+
+    public void UpdateInterestGroup(byte teamID)
+    {
+        if(!HasInputAuthority) 
+            return;
+        recorder.InterestGroup = teamID;
+        voiceClient.Client.OpChangeGroups(null, new byte[] {teamID});
+        Debug.Log("Interest Group asignado a: " + teamID);
     }
 
     private void Update()

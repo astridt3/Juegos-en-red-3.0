@@ -119,7 +119,11 @@ public class TeamManager : NetworkBehaviour
             if (playerComponent != null)
             {
                 playerComponent.Team = team;
-
+                PlayerVoice voice = playerObject.GetComponent<PlayerVoice>();
+                if (voice != null)
+                {
+                    voice.UpdateInterestGroup(team);
+                }
                 Debug.Log(player + " ahora pertenece al Equipo " + team);
             }
             else

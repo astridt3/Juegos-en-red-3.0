@@ -402,6 +402,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4ceb8f8238b6f04087074d5d7b0610c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerVoice
+  voiceClient: {fileID: 0}
 --- !u!114 &-5187751707453535410
 MonoBehaviour:
   m_ObjectHideFlags: 0
