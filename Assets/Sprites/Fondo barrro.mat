@@ -64,9 +64,9 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Direccion: {r: 0, g: 0.05, b: 0, a: 0}
+    - _Direccion: {r: 0, g: 0.18, b: 0, a: 0}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Size: {r: 6, g: 1.5, b: 0, a: 0}
+    - _Size: {r: 6, g: 2, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &782061507128909470

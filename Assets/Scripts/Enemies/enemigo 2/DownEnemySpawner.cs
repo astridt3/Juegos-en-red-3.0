@@ -7,6 +7,7 @@ public class DownEnemySpawner : NetworkBehaviour
     [SerializeField] private NetworkPrefabRef enemyPrefab;
     [SerializeField] private NetworkPrefabRef enemyPrefab2;
     [SerializeField] private NetworkPrefabRef enemyPrefab3;
+    [SerializeField] private NetworkPrefabRef enemyPrefab4;
 
     [Header("Spawn")]
     [SerializeField] private float spawnInterval = 3f;
@@ -60,7 +61,7 @@ public class DownEnemySpawner : NetworkBehaviour
 
         NetworkPrefabRef selectedEnemy;
 
-        int randomEnemy = Random.Range(0, 3);
+        int randomEnemy = Random.Range(0, 4);
 
         if (randomEnemy == 0)
         {
@@ -70,9 +71,13 @@ public class DownEnemySpawner : NetworkBehaviour
         {
             selectedEnemy = enemyPrefab2;
         }
-        else
+        else if (randomEnemy == 2)
         {
             selectedEnemy = enemyPrefab3;
+        }
+        else
+        {
+            selectedEnemy = enemyPrefab4;
         }
 
         Runner.Spawn(selectedEnemy, spawnPosition, Quaternion.identity);
