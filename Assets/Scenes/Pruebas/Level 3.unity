@@ -1721,6 +1721,78 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &973413794
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973413797}
+  - component: {fileID: 973413796}
+  - component: {fileID: 973413795}
+  m_Layer: 0
+  m_Name: SwapPowerUpSpawener
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &973413795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973413794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 3095567212
+  SendPriority: 1
+  EnableInterpolation: 1
+  Flags: 262146
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 973413796}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &973413796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973413794}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c1e70616755504ba05e6aad6a8c4cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  swapPowerUpPrefab:
+    RawGuidValue: 86e1fe6fb1b6521459d716a5ed767383
+  mainCamera: {fileID: 633238901}
+  spawnHeight: 2
+  maxSpawns: 2
+  firstSpawnTime: 20
+  spawnInterval: 35
+--- !u!4 &973413797
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 973413794}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.1127, y: -0.5915, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1265148342
 GameObject:
   m_ObjectHideFlags: 0
@@ -1913,6 +1985,8 @@ MonoBehaviour:
   enemyPrefab2:
     RawGuidValue: 56c86c9df1f9dbc49b3ada7e811bc85c
   enemyPrefab3:
+    RawGuidValue: 00000000000000000000000000000000
+  enemyPrefab4:
     RawGuidValue: 00000000000000000000000000000000
   spawnInterval: 2
   margin: 1
@@ -2563,6 +2637,7 @@ SceneRoots:
   - {fileID: 154818381}
   - {fileID: 250782291}
   - {fileID: 127060671}
+  - {fileID: 973413797}
   - {fileID: 119285733}
   - {fileID: 1378026949}
   - {fileID: 111278370}

@@ -244,6 +244,78 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb222b6bbc49a944f9ae6f6b2219ef32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FinishLine
+--- !u!1 &134938935
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 134938938}
+  - component: {fileID: 134938937}
+  - component: {fileID: 134938936}
+  m_Layer: 0
+  m_Name: SwapPowerUpSpawener
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &134938936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134938935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkObject
+  SortKey: 969513593
+  SendPriority: 1
+  EnableInterpolation: 1
+  Flags: 262146
+  NestedObjects: []
+  NetworkedBehaviours:
+  - {fileID: 134938937}
+  ForceRemoteRenderTimeframe: 0
+--- !u!114 &134938937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134938935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c1e70616755504ba05e6aad6a8c4cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  swapPowerUpPrefab:
+    RawGuidValue: 86e1fe6fb1b6521459d716a5ed767383
+  mainCamera: {fileID: 738345189}
+  spawnHeight: 2
+  maxSpawns: 2
+  firstSpawnTime: 20
+  spawnInterval: 35
+--- !u!4 &134938938
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134938935}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 3.1127, y: -0.5915, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &216182027
 GameObject:
   m_ObjectHideFlags: 0
@@ -2616,3 +2688,4 @@ SceneRoots:
   - {fileID: 1098908905}
   - {fileID: 1730410283}
   - {fileID: 1537858234}
+  - {fileID: 134938938}
