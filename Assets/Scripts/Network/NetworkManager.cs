@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -64,6 +65,10 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         runner.ProvideInput = true;
         Debug.Log("Creando servidor...");
         netMenu.CreatingServer();
+
+        Debug.Log("Descargando configuración Live Ops...");
+
+        await LiveOpsConfig.LoadConfig();
 
         StartGameResult result = await runner.StartGame(new StartGameArgs
         {
@@ -126,6 +131,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public async void QuickPlay()
     {
         runner.ProvideInput = true;
+        await LiveOpsConfig.LoadConfig();
         StartGameResult result = await runner.StartGame(new StartGameArgs()
         {
             GameMode = GameMode.AutoHostOrClient,

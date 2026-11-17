@@ -12,6 +12,9 @@ public class DownEnemy : NetworkBehaviour
     [SerializeField] private AudioDefinition enemy2Spawn;
     [SerializeField] private AudioDefinition playerKill;
 
+    [Networked]
+    private float NetworkMoveSpeed { get; set; }
+
     private IAudioService audioService;
     private Rigidbody2D rb;
     private float lifeTimer;
@@ -29,6 +32,14 @@ public class DownEnemy : NetworkBehaviour
     {
         lifeTimer = lifeTime;
 
+        if (Object.HasStateAuthority)
+        {
+            NetworkMoveSpeed =
+                moveSpeed * LiveOpsConfig.EnemySpeedMultiplier;
+
+            Debug.Log("Velocidad del enemigo: " + NetworkMoveSpeed);
+        }
+
         if (audioService != null && enemy2Spawn != null)
         {
             audioService.PlaySFX(enemy2Spawn);
@@ -40,10 +51,8 @@ public class DownEnemy : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        // Siempre hacia abajo
-        rb.linearVelocity = Vector2.down * moveSpeed;
+        transform.position += Vector3.down * NetworkMoveSpeed * Runner.DeltaTime;
 
-        // Evitamos que se quede existiendo para siempre
         lifeTimer -= Runner.DeltaTime;
 
         if (lifeTimer <= 0)
