@@ -1,4 +1,3 @@
-using UnityEngine;
 using Fusion;
 
 public class TeamManager : NetworkBehaviour
@@ -232,27 +231,5 @@ public class TeamManager : NetworkBehaviour
             player.Team = 0;
             player.IsAlive = true;
         }
-    }
-
-    public void ReplacePlayerRef(PlayerRef oldPlayer, PlayerRef newPlayer)
-    {
-        if (!Object.HasStateAuthority)
-            return;
-
-        if (Team1Slot1 == oldPlayer)
-            Team1Slot1 = newPlayer;
-
-        if (Team1Slot2 == oldPlayer)
-            Team1Slot2 = newPlayer;
-
-        if (Team2Slot1 == oldPlayer)
-            Team2Slot1 = newPlayer;
-
-        if (Team2Slot2 == oldPlayer)
-            Team2Slot2 = newPlayer;
-
-        CheckIfTeamsAreFull();
-
-        Debug.Log($"TeamManager actualizado: {oldPlayer} -> {newPlayer}");
     }
 }

@@ -58,7 +58,7 @@ public class NetworkMenu : MonoBehaviour
         NetworkManager.OnConnectedToGame += ConnectedToGame;
         NetworkManager.OnConnectionFailed += ConnectionFailed;
         NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
-        NetworkManager.OnReconnectedToGame += ReconnectedToGame;
+        NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
     }
 
     private void OnDisable()
@@ -66,7 +66,7 @@ public class NetworkMenu : MonoBehaviour
         NetworkManager.OnConnectedToGame -= ConnectedToGame;
         NetworkManager.OnConnectionFailed -= ConnectionFailed;
         NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
-        NetworkManager.OnReconnectedToGame -= ReconnectedToGame;
+        NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
     }
 
     private void ConnectedToGame()

@@ -737,7 +737,7 @@ GameObject:
   - component: {fileID: 200385616}
   - component: {fileID: 200385615}
   m_Layer: 0
-  m_Name: NetworkSceneManager
+  m_Name: NetworkSceneManagerDefault
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5686,7 +5686,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd7a56598255a774c9205233251fe4fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
-  sceneManager: {fileID: 200385615}
+  sceneManager: {fileID: 0}
   runner: {fileID: 1377512010}
   playerPrefab:
     RawGuidValue: f9bf01594be044245a9d13ddb9177949
@@ -5697,7 +5697,6 @@ MonoBehaviour:
   - {fileID: 0}
   netMenu: {fileID: 20930182}
   objectProvider: {fileID: 1237182901}
-  reconnectTimeout: 120
 --- !u!4 &1377512008
 Transform:
   m_ObjectHideFlags: 0
