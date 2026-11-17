@@ -22,16 +22,15 @@ public class DashEnemy : NetworkBehaviour
     [SerializeField] private byte initialHealth = 10;
 
     private SpriteRenderer spriteRenderer;
+    private Rigidbody2D rb;
 
     [Networked]
     private NetworkBool IsDashing { get; set; }
-    public byte Health { get; set; }
 
-    private Rigidbody2D rb;
+    public byte Health { get; set; }
 
     private float lifeTimer;
     private float phaseTimer;
-
     private Vector2 dashDirection;
 
     private EnemyPhase currentPhase;
@@ -43,20 +42,20 @@ public class DashEnemy : NetworkBehaviour
         Dashing
     }
 
-
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
-        rb.gravityScale = 0f;
-        rb.angularVelocity = 0f;
+        if (rb != null)
+        {
+            rb.gravityScale = 0f;
+            rb.angularVelocity = 0f;
+        }
     }
-
 
     public override void Spawned()
     {
-        //Solo el State Authority controla al enemigo.
         if (!Object.HasStateAuthority)
             return;
 
@@ -66,14 +65,12 @@ public class DashEnemy : NetworkBehaviour
         phaseTimer = descendDuration;
 
         currentPhase = EnemyPhase.Descending;
-
         dashDirection = Vector2.down;
     }
 
-
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasStateAuthority)
+        if (!Object.HasStateAuthority || rb == null)
             return;
 
         lifeTimer -= Runner.DeltaTime;
@@ -109,29 +106,22 @@ public class DashEnemy : NetworkBehaviour
         if (phaseTimer <= 0f)
         {
             currentPhase = EnemyPhase.Waiting;
-
             phaseTimer = waitBeforeDash;
-
             rb.linearVelocity = Vector2.zero;
 
             Debug.Log("Enemy3 esperando.");
         }
     }
 
-
     private void WaitBeforeDashing()
     {
-        //Para que parezca que frena hay que poner la velocidad en negativo
         rb.linearVelocity = Vector2.down * waitSpeed;
 
         phaseTimer -= Runner.DeltaTime;
 
         if (phaseTimer <= 0f)
-        {
             StartDash();
-        }
     }
-
 
     private void StartDash()
     {
@@ -139,21 +129,14 @@ public class DashEnemy : NetworkBehaviour
 
         if (TryGetClosestPlayerPosition(out targetPosition))
         {
-            Vector2 direction =
-                targetPosition - rb.position;
+            Vector2 direction = targetPosition - rb.position;
 
-            if (direction.sqrMagnitude > 0.001f)
-            {
-                dashDirection = direction.normalized;
-            }
-            else
-            {
-                dashDirection = Vector2.down;
-            }
+            dashDirection = direction.sqrMagnitude > 0.001f
+                ? direction.normalized
+                : Vector2.down;
         }
         else
         {
-            //Si no hay jugadores vivos, sigue bajando.
             dashDirection = Vector2.down;
         }
 
@@ -165,46 +148,32 @@ public class DashEnemy : NetworkBehaviour
         Debug.Log("El enemy3 se manda");
     }
 
-
-    private bool TryGetClosestPlayerPosition(
-        out Vector2 closestPosition)
+    private bool TryGetClosestPlayerPosition(out Vector2 closestPosition)
     {
         closestPosition = Vector2.zero;
 
         float closestDistance = Mathf.Infinity;
-
         bool foundPlayer = false;
 
         foreach (PlayerRef playerRef in Runner.ActivePlayers)
         {
-            NetworkObject playerObject =
-                Runner.GetPlayerObject(playerRef);
+            NetworkObject playerObject = Runner.GetPlayerObject(playerRef);
 
             if (playerObject == null)
                 continue;
 
-            Player player =
-                playerObject.GetComponent<Player>();
+            Player player = playerObject.GetComponent<Player>();
 
-            if (player == null)
+            if (player == null || !player.IsAlive)
                 continue;
 
-            //Ignora a los jugadores muertos.
-            if (!player.IsAlive)
-                continue;
-
-            Vector2 playerPosition =
-                playerObject.transform.position;
-
-            float distance =
-                (playerPosition - rb.position).sqrMagnitude;
+            Vector2 playerPosition = playerObject.transform.position;
+            float distance = (playerPosition - rb.position).sqrMagnitude;
 
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-
                 closestPosition = playerPosition;
-
                 foundPlayer = true;
             }
         }
@@ -212,15 +181,10 @@ public class DashEnemy : NetworkBehaviour
         return foundPlayer;
     }
 
-
-
     private void Dash()
     {
-        //La dirección se calcula una sola vez.
-        rb.linearVelocity = dashDirection * dashSpeed;        
+        rb.linearVelocity = dashDirection * dashSpeed;
     }
-
-
 
     public void TakeDamage(byte amount)
     {
@@ -230,23 +194,18 @@ public class DashEnemy : NetworkBehaviour
         if (amount == 0 || Health == 0)
             return;
 
-        Health = (byte)Mathf.Max(0, (int)Health - amount);        
+        Health = (byte)Mathf.Max(0, (int)Health - amount);
 
         if (Health == 0)
-        {
             Die();
-        }
     }
-
-
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!Object.HasStateAuthority)
             return;
 
-        Player player =
-            collision.gameObject.GetComponentInParent<Player>();
+        Player player = collision.collider.GetComponentInParent<Player>();
 
         if (player == null)
             return;
@@ -254,9 +213,10 @@ public class DashEnemy : NetworkBehaviour
         if (!player.IsAlive)
             return;
 
+        Debug.Log("DashEnemy golpeó al jugador.");
+
         player.Kill();
     }
-
 
     private void Die()
     {
@@ -270,9 +230,7 @@ public class DashEnemy : NetworkBehaviour
 
     public override void Render()
     {
-        if (IsDashing && spriteRenderer != null)
-        {
-            spriteRenderer.color = Color.red;
-        }
+        if (spriteRenderer != null)
+            spriteRenderer.color = IsDashing ? Color.red : Color.white;
     }
 }

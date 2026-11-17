@@ -1,3 +1,4 @@
+
 using Fusion;
 using UnityEngine;
 using System.Collections.Generic;
@@ -22,7 +23,9 @@ public class FollowUpEnemy : NetworkBehaviour
     private Rigidbody2D rb;
     private NetworkObject target;
     private IAudioService audioService;
-    private readonly List<LagCompensatedHit> lagCompensationHits = new List<LagCompensatedHit>();
+
+    private readonly List<LagCompensatedHit> lagCompensationHits =
+        new List<LagCompensatedHit>();
 
     private void Awake()
     {
@@ -37,19 +40,16 @@ public class FollowUpEnemy : NetworkBehaviour
     public override void Spawned()
     {
         if (Object.HasStateAuthority)
-        {
             Health = initialHealth;
-        }
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (!Object.HasStateAuthority)
+        if (!Object.HasStateAuthority || rb == null)
             return;
 
         GetClosestPlayer();
         FollowPlayer();
-
         CheckPlayerWithLagCompensation();
     }
 
@@ -60,7 +60,7 @@ public class FollowUpEnemy : NetworkBehaviour
 
         Player player = target.GetComponent<Player>();
 
-        if (player == null)
+        if (player == null || !player.IsAlive)
             return;
 
         int hitsFound = Runner.LagCompensation.OverlapSphere(
@@ -80,7 +80,7 @@ public class FollowUpEnemy : NetworkBehaviour
             Player hitPlayer =
                 lagCompensationHits[i].Hitbox.GetComponentInParent<Player>();
 
-            if (hitPlayer == player)
+            if (hitPlayer == player && hitPlayer.IsAlive)
             {
                 hitPlayer.Kill();
                 return;
@@ -90,32 +90,39 @@ public class FollowUpEnemy : NetworkBehaviour
 
     private void GetClosestPlayer()
     {
-        //necesitamos una estrategia para buscar al jugador correcto
-        Collider2D[] players = Physics2D.OverlapCircleAll(rb.position, detectionRadious, playerLayer);
+        Collider2D[] players = Physics2D.OverlapCircleAll(
+            rb.position,
+            detectionRadious,
+            playerLayer
+        );
 
         target = null;
 
         float closestDistance = Mathf.Infinity;
 
-        foreach (Collider2D player in players)
+        foreach (Collider2D playerCollider in players)
         {
-            NetworkObject networkObject = player.GetComponentInParent<NetworkObject>();
+            // Busca el NetworkObject en el padre del collider.
+            NetworkObject networkObject =
+                playerCollider.GetComponentInParent<NetworkObject>();
 
-            if (networkObject == null)
+            if (networkObject == null || networkObject == Object)
                 continue;
 
-            if (networkObject == Object)
+            // Busca el Player en el padre.
+            Player player = networkObject.GetComponent<Player>();
+
+            if (player == null || !player.IsAlive)
                 continue;
 
-            if (!networkObject.CompareTag("Player"))
-                continue;
-
-            float distance = Vector2.Distance(rb.position, networkObject.transform.position);
+            float distance = Vector2.Distance(
+                rb.position,
+                networkObject.transform.position
+            );
 
             if (distance < closestDistance)
             {
                 closestDistance = distance;
-                // usa network transform
                 target = networkObject;
             }
         }
@@ -129,32 +136,31 @@ public class FollowUpEnemy : NetworkBehaviour
             return;
         }
 
-        // using Steearing behaviour seek
-        Vector2 direction = ((Vector2)target.transform.position - rb.position).normalized;
+        Vector2 direction =
+            ((Vector2)target.transform.position - rb.position).normalized;
 
         rb.linearVelocity = direction * moveSpeed;
     }
 
     public void TakeDamage(byte amount)
     {
-        if (!Object.HasStateAuthority)
+        if (!Object.HasStateAuthority || amount == 0 || Health == 0)
             return;
 
-        Health -= amount;
+        Health = (byte)Mathf.Max(0, (int)Health - amount);
 
         if (audioService != null && attackSound != null)
-        {
             audioService.PlaySFX(attackSound);
-        }
 
-        if (Health <= 0)
-        {
+        if (Health == 0)
             Die();
-        }
     }
 
     private void Die()
     {
+        if (!Object.HasStateAuthority)
+            return;
+
         rb.linearVelocity = Vector2.zero;
 
         Runner.Despawn(Object);
@@ -165,16 +171,15 @@ public class FollowUpEnemy : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            //hacemos daño al jugador
-            //usamos la propiedad AttackDamage
-            Player player = collision.gameObject.GetComponent<Player>();
+        // Busca Player en el collider o en sus padres.
+        Player player =
+            collision.collider.GetComponentInParent<Player>();
 
-            if (player != null)
-            {
-                player.Kill();
-            }
-        }
+        if (player == null || !player.IsAlive)
+            return;
+
+        Debug.Log("FollowUpEnemy golpeó al jugador.");
+
+        player.Kill();
     }
 }

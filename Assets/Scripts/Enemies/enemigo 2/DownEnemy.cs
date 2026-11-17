@@ -1,3 +1,4 @@
+
 using Fusion;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ public class DownEnemy : NetworkBehaviour
 
     [Header("Despawn")]
     [SerializeField] private float lifeTime = 10f;
+
     [Header("Enemy Sounds")]
     [SerializeField] private AudioDefinition enemy2Spawn;
     [SerializeField] private AudioDefinition playerKill;
@@ -23,6 +25,7 @@ public class DownEnemy : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
     }
+
     private void Start()
     {
         audioService = ServiceLocator.Get<IAudioService>();
@@ -30,20 +33,18 @@ public class DownEnemy : NetworkBehaviour
 
     public override void Spawned()
     {
+        if (!Object.HasStateAuthority)
+            return;
+
         lifeTimer = lifeTime;
 
-        if (Object.HasStateAuthority)
-        {
-            NetworkMoveSpeed =
-                moveSpeed * LiveOpsConfig.EnemySpeedMultiplier;
+        NetworkMoveSpeed =
+            moveSpeed * LiveOpsConfig.EnemySpeedMultiplier;
 
-            Debug.Log("Velocidad del enemigo: " + NetworkMoveSpeed);
-        }
+        Debug.Log("Velocidad del enemigo: " + NetworkMoveSpeed);
 
         if (audioService != null && enemy2Spawn != null)
-        {
             audioService.PlaySFX(enemy2Spawn);
-        }
     }
 
     public override void FixedUpdateNetwork()
@@ -56,9 +57,7 @@ public class DownEnemy : NetworkBehaviour
         lifeTimer -= Runner.DeltaTime;
 
         if (lifeTimer <= 0)
-        {
             Runner.Despawn(Object);
-        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -66,18 +65,17 @@ public class DownEnemy : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        if (!collision.gameObject.CompareTag("Player"))
+        // Busca Player en el collider o en sus padres.
+        Player player = collision.collider.GetComponentInParent<Player>();
+
+        if (player == null || !player.IsAlive)
             return;
 
-        Player player = collision.gameObject.GetComponent<Player>();
         if (audioService != null && playerKill != null)
-        {
             audioService.PlaySFX(playerKill);
-        }
 
-        if (player != null)
-        {
-            player.Kill();
-        }
+        Debug.Log("DownEnemy golpeó al jugador.");
+
+        player.Kill();
     }
 }
