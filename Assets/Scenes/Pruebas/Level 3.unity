@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 111278370}
   - component: {fileID: 111278369}
   - component: {fileID: 111278368}
+  - component: {fileID: 111278371}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -154,6 +155,7 @@ MonoBehaviour:
   resultText: {fileID: 1833382436}
   restartButton: {fileID: 1398683964}
   teamSelectionButton: {fileID: 0}
+  cloudS: {fileID: 111278371}
 --- !u!114 &111278369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -189,6 +191,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &111278371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 111278367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1e85b51001dbe42b7b728edd9563c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloudS
 --- !u!1 &113376228
 GameObject:
   m_ObjectHideFlags: 0

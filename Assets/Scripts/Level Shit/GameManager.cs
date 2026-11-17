@@ -1,4 +1,5 @@
 using Fusion;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +15,12 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private TMP_Text resultText;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button teamSelectionButton;
-    
+
+    [Header("Unity Services")]
+    [SerializeField] private CloudS cloudS;
+
+    private bool resultadoEnviado;
+
     private bool ShowPanel;
 
     public override void Spawned()
@@ -33,6 +39,7 @@ public class GameManager : NetworkBehaviour
         }
 
         ShowPanel = false;
+        resultadoEnviado = false;
     }
 
     public override void FixedUpdateNetwork()
@@ -63,8 +70,57 @@ public class GameManager : NetworkBehaviour
             return;
 
         ShowEndGamePanel();
-    }
 
+        if (!resultadoEnviado)
+        {
+            RegistrarResultadoLocal();
+        }
+    }
+    private async void RegistrarResultadoLocal()
+    {
+        if (WinningTeam != 1 && WinningTeam != 2)
+        {
+            resultadoEnviado = true;
+            return;
+        }
+
+        NetworkObject jugadorLocal =
+            Runner.GetPlayerObject(Runner.LocalPlayer);
+
+        if (jugadorLocal == null)
+            return;
+
+        Player player = jugadorLocal.GetComponent<Player>();
+
+        if (player == null)
+            return;
+
+        if (cloudS == null)
+        {
+            Debug.LogError("No se asignó CloudS en GameManager.");
+            return;
+        }
+
+        resultadoEnviado = true;
+
+        if (player.Team == WinningTeam)
+        {
+            try
+            {
+                await cloudS.RegistrarVictoria();
+
+                Debug.Log("¡Victoria registrada en Unity Leaderboards!");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error registrando la victoria: " + e.Message);
+            }
+        }
+        else
+        {
+            Debug.Log("Partida perdida. No se suman victorias.");
+        }
+    }
     private bool AreAllPlayersReady()
     {
         bool foundPlayer = false;

@@ -1809,6 +1809,8 @@ MonoBehaviour:
     RawGuidValue: 00000000000000000000000000000000
   enemyPrefab3:
     RawGuidValue: 00000000000000000000000000000000
+  enemyPrefab4:
+    RawGuidValue: 00000000000000000000000000000000
   spawnInterval: 3
   margin: 1
 --- !u!4 &1619848104
@@ -2060,6 +2062,7 @@ GameObject:
   - component: {fileID: 1940116925}
   - component: {fileID: 1940116924}
   - component: {fileID: 1940116923}
+  - component: {fileID: 1940116926}
   m_Layer: 0
   m_Name: GameManager (1)
   m_TagString: Untagged
@@ -2084,6 +2087,7 @@ MonoBehaviour:
   resultText: {fileID: 1075077456}
   restartButton: {fileID: 1994775944}
   teamSelectionButton: {fileID: 0}
+  cloudS: {fileID: 1940116926}
 --- !u!114 &1940116924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2119,6 +2123,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1940116926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1940116922}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1e85b51001dbe42b7b728edd9563c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloudS
 --- !u!1 &1971704906
 GameObject:
   m_ObjectHideFlags: 0

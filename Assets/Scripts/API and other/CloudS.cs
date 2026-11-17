@@ -1,132 +1,112 @@
+
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
-using Unity.Services.Leaderboards;
-using Unity.Services.CloudSave;
 using Unity.Services.Core;
+using Unity.Services.CloudSave;
+using Unity.Services.Leaderboards;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 
 public class CloudS : MonoBehaviour
 {
-    private async void Start()
+    private const string leaderboardId = "general";
+
+    private const string winsKey = "victorias";
+
+    private Task initializationTask;
+
+    private async Task AsegurarServicios()
     {
-        try
+        if (initializationTask == null)
         {
-            await UnityServices.InitializeAsync();
+            initializationTask = InicializarServicios();
+        }
+
+        await initializationTask;
+    }
+
+    private async Task InicializarServicios()
+    {
+        await UnityServices.InitializeAsync();
+
+        if (!AuthenticationService.Instance.IsSignedIn)
+        {
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
-            Debug.Log("Autenticacion exitosa");
-            Debug.Log("PlayerID: " + AuthenticationService.Instance.PlayerId);
-
-            Guardar();
-            Cargar();
-            MostrarPuntajePropio();
         }
-        catch (System.Exception e)
-        {
-            Debug.LogError(e.Message);
-        }
+
+        Debug.Log("Autenticación exitosa.");
+        Debug.Log("Player ID: " + AuthenticationService.Instance.PlayerId);
     }
 
-    private async void Guardar()
+    public async Task RegistrarVictoria()
     {
-        try
+        await AsegurarServicios();
+
+        var datos = await CloudSaveService.Instance.Data.Player.LoadAsync(
+            new HashSet<string> { winsKey }
+        );
+
+        int victorias = 0;
+
+        if (datos.TryGetValue(winsKey, out var valor))
         {
-            await GuardarDatos(500, 10);
+            victorias = valor.Value.GetAs<int>();
         }
-        catch (System.Exception ex)
+
+        victorias++;
+
+        var nuevosDatos = new Dictionary<string, object>
         {
-            Debug.LogException(ex);
-        }
-    }
-    public async Task GuardarDatos(int monedas, int level)
-    {
-        var datos = new Dictionary<string, object>
-        {
-            { "monedas", monedas },
-            { "level", level }
+            { winsKey, victorias }
         };
 
-        await CloudSaveService.Instance.Data.Player.SaveAsync(datos);
-        Debug.Log("Datos guardados");
-    }
+        await CloudSaveService.Instance.Data.Player.SaveAsync(nuevosDatos);
 
-    private async void Cargar()
-    {
-        try
-        {
-            await CargarDatos();
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogException(ex);
-        }
-    }
+        Debug.Log("Victorias guardadas: " + victorias);
 
-    public async Task CargarDatos()
-    {
-        var datos = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> { "monedas", "level" });
-        if (datos.TryGetValue("monedas", out var monedas))
-        {
-            Debug.Log("Monedas: " + monedas.Value.GetAs<int>());
-        }
-        if (datos.TryGetValue("level", out var level))
-        {
-            Debug.Log("Level: " + level.Value.GetAs<int>());
-        }
-    }
+        await LeaderboardsService.Instance.AddPlayerScoreAsync(
+            leaderboardId,
+            victorias
+        );
 
-    public async void GuardarNuevoPuntaje(int puntos)
-    {
-        try
-        {
-            await GuardarPuntaje(puntos);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogException(ex);
-        }
-    }
-
-    public async Task GuardarPuntaje(int puntos)
-    {
-        await LeaderboardsService.Instance.AddPlayerScoreAsync("general", puntos);
-        Debug.Log("Puntaje enviado: " + puntos);
+        Debug.Log("Ranking actualizado: " + victorias);
     }
 
     public async Task MostrarRanking()
     {
-        var resultado = await LeaderboardsService.Instance.GetScoresAsync("general", new GetScoresOptions
-        {
-            Offset = 0,
-            Limit = 100
-        });
+        await AsegurarServicios();
+
+        var resultado = await LeaderboardsService.Instance.GetScoresAsync(
+            leaderboardId,
+            new GetScoresOptions
+            {
+                Offset = 0,
+                Limit = 100
+            }
+        );
 
         foreach (var jugador in resultado.Results)
         {
             Debug.Log(
-                "Posicion: " + (jugador.Rank + 1) +
+                "Posición: " + (jugador.Rank + 1) +
                 " | ID: " + jugador.PlayerId +
-                " | Puntaje: " + jugador.Score
-                );
+                " | Victorias: " + jugador.Score
+            );
         }
     }
 
-    private async void MostrarPuntajePropio()
-    {
-        try
-        {
-            await MostrarMiPuntaje();
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogException(ex);
-        }
-    }
     public async Task MostrarMiPuntaje()
     {
-        var jugador = await LeaderboardsService.Instance.GetPlayerScoreAsync("general");
-        Debug.Log("Mi posicion: " + (jugador.Rank + 1) + " | Mi puntaje: " + jugador.Score);
+        await AsegurarServicios();
+
+        var jugador = await LeaderboardsService.Instance.GetPlayerScoreAsync(
+            leaderboardId
+        );
+
+        Debug.Log(
+            "Mi posición: " + (jugador.Rank + 1) +
+            " | Victorias: " + jugador.Score
+        );
     }
 }
