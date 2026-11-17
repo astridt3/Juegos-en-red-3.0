@@ -41,7 +41,6 @@ public class DashEnemy : NetworkBehaviour
         Waiting,
         Dashing
     }
-
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -51,8 +50,10 @@ public class DashEnemy : NetworkBehaviour
         {
             rb.gravityScale = 0f;
             rb.angularVelocity = 0f;
+            rb.freezeRotation = true;
         }
     }
+
 
     public override void Spawned()
     {
@@ -200,6 +201,7 @@ public class DashEnemy : NetworkBehaviour
             Die();
     }
 
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!Object.HasStateAuthority)
@@ -207,16 +209,13 @@ public class DashEnemy : NetworkBehaviour
 
         Player player = collision.collider.GetComponentInParent<Player>();
 
-        if (player == null)
+        if (player == null || !player.IsAlive)
             return;
 
-        if (!player.IsAlive)
-            return;
-
-        Debug.Log("DashEnemy golpeó al jugador.");
-
+        rb.linearVelocity = Vector2.zero;
         player.Kill();
     }
+
 
     private void Die()
     {

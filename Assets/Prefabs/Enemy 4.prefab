@@ -112,8 +112,6 @@ MonoBehaviour:
   verticalSpeed: 2
   horizontalSpeed: 3
   horizontalLimit: 2.5
-  minChangeTime: 5
-  maxChangeTime: 10
   initialHealth: 10
   _Health: 0
 --- !u!114 &-2318861235535528115
@@ -203,7 +201,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!95 &6688054639694785637
 Animator:
   serializedVersion: 7

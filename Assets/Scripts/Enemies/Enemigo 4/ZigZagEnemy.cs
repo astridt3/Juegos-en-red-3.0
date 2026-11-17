@@ -25,6 +25,7 @@ public class ZigZagEnemy : NetworkBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0f;
+        rb.freezeRotation = true;
     }
 
     public override void Spawned()
@@ -74,10 +75,13 @@ public class ZigZagEnemy : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        Player player = collision.gameObject.GetComponentInParent<Player>();
+        Player player = collision.collider.GetComponentInParent<Player>();
 
-        if (player != null && player.IsAlive)
-            player.Kill();
+        if (player == null || !player.IsAlive)
+            return;
+
+        rb.linearVelocity = Vector2.zero;
+        player.Kill();
     }
 
     private void Die()

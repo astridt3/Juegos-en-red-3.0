@@ -179,7 +179,7 @@ public class FollowUpEnemy : NetworkBehaviour
             return;
 
         Debug.Log("FollowUpEnemy golpeó al jugador.");
-
+        rb.linearVelocity = Vector2.zero;
         player.Kill();
     }
 }
