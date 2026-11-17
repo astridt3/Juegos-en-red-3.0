@@ -1,3 +1,4 @@
+
 using Fusion;
 using UnityEngine;
 
@@ -7,12 +8,16 @@ public class Player : NetworkBehaviour
     [SerializeField] private float speed;
 
     [Header("Visual")]
-    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private GameObject bluePlayer;
+    [SerializeField] private GameObject redPlayer;
 
     [SerializeField] private Color team1Color = Color.blue;
     [SerializeField] private Color team2Color = Color.red;
 
     [SerializeField] private GameObject indicator;
+
+    private SpriteRenderer blueSpriteRenderer;
+    private SpriteRenderer redSpriteRenderer;
 
     [Header("Power Up PvP")]
     [SerializeField] private float powerUpDuration = 5;
@@ -35,20 +40,30 @@ public class Player : NetworkBehaviour
 
     [Header("Dash Visual")]
     [SerializeField] private TrailRenderer dashTrail;
+
     private NetworkButtons previousButtons;
     private Vector2 lastMovementDirection = Vector2.right;
 
     private int lastTeam = -1;
 
+
     public override void Spawned()
     {
-        if (Object.HasInputAuthority)
+        // INDICATOR
+        if (indicator != null)
         {
-            indicator.SetActive(true);
+            indicator.SetActive(Object.HasInputAuthority);
         }
-        else
+
+        // REFERENCIAS VISUALES
+        if (bluePlayer != null)
         {
-            indicator.SetActive(false);
+            blueSpriteRenderer = bluePlayer.GetComponent<SpriteRenderer>();
+        }
+
+        if (redPlayer != null)
+        {
+            redSpriteRenderer = redPlayer.GetComponent<SpriteRenderer>();
         }
 
         if (Object.HasStateAuthority)
@@ -65,8 +80,9 @@ public class Player : NetworkBehaviour
             dashTrail.emitting = false;
         }
 
-        UpdateColor();
+        UpdateVisual();
     }
+
 
     public override void FixedUpdateNetwork()
     {
@@ -84,7 +100,7 @@ public class Player : NetworkBehaviour
                 movement * speed * Runner.DeltaTime
             );
 
-            // Guardamos la última dirección en la que se movió
+            // GUARDAMOS LA ÚLTIMA DIRECCIÓN
             if (movement != Vector2.zero)
             {
                 lastMovementDirection = movement.normalized;
@@ -113,8 +129,9 @@ public class Player : NetworkBehaviour
             }
         }
 
-
-        if (CanPvp && Runner.SimulationTime >= PowerUpEndTime)
+        // POWER UP PVP
+        if (Object.HasStateAuthority && CanPvp &&
+            Runner.SimulationTime >= PowerUpEndTime)
         {
             CanPvp = false;
 
@@ -122,12 +139,14 @@ public class Player : NetworkBehaviour
         }
     }
 
+
     private void Dash()
     {
         transform.position += (Vector3)(lastMovementDirection * dashDistance);
 
         Debug.Log("DASH!");
     }
+
 
     public void ActivateDash()
     {
@@ -144,22 +163,52 @@ public class Player : NetworkBehaviour
 
     private void Update()
     {
+        // ACTUALIZAR EQUIPO
         if (lastTeam != Team)
         {
-            UpdateColor();
+            UpdateVisual();
         }
 
-        if (!IsAlive)
+        // COLOR AL MORIR
+        if (Team == 1 && blueSpriteRenderer != null)
         {
-            spriteRenderer.color = Color.gray;
+            blueSpriteRenderer.color = IsAlive ? team1Color : Color.gray;
+        }
+        else if (Team == 2 && redSpriteRenderer != null)
+        {
+            redSpriteRenderer.color = IsAlive ? team2Color : Color.gray;
         }
 
-        // Efecto visual del Dash
+        // EFECTO VISUAL DEL DASH
         if (dashTrail != null)
         {
             dashTrail.emitting = HasDash;
         }
     }
+
+
+    private void UpdateVisual()
+    {
+        lastTeam = Team;
+
+        if (bluePlayer == null || redPlayer == null)
+            return;
+
+        // ACTIVAR EL PERSONAJE CORRESPONDIENTE
+        bluePlayer.SetActive(Team == 1);
+        redPlayer.SetActive(Team == 2);
+
+        // COLORES
+        if (Team == 1 && blueSpriteRenderer != null)
+        {
+            blueSpriteRenderer.color = IsAlive ? team1Color : Color.gray;
+        }
+        else if (Team == 2 && redSpriteRenderer != null)
+        {
+            redSpriteRenderer.color = IsAlive ? team2Color : Color.gray;
+        }
+    }
+
 
     public void ActivatePowerUp()
     {
@@ -167,27 +216,10 @@ public class Player : NetworkBehaviour
             return;
 
         CanPvp = true;
+
         PowerUpEndTime = Runner.SimulationTime + powerUpDuration;
 
         Debug.Log("Power Up activado");
-    }
-
-
-    private void UpdateColor()
-    {
-        lastTeam = Team;
-
-        if (spriteRenderer == null)
-            return;
-
-        if (Team == 1)
-        {
-            spriteRenderer.color = team1Color;
-        }
-        else if (Team == 2)
-        {
-            spriteRenderer.color = team2Color;
-        }
     }
 
 

@@ -1,3 +1,4 @@
+
 using Fusion;
 using UnityEngine;
 
@@ -8,9 +9,11 @@ public class PvpPowerUp : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        if (collision.CompareTag("Player"))
+        Player player = collision.GetComponentInParent<Player>();
+
+        if (player != null)
         {
-            collision.GetComponent<Player>().ActivatePowerUp();
+            player.ActivatePowerUp();
 
             Runner.Despawn(Object);
         }
