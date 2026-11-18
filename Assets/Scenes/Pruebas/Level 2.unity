@@ -1716,7 +1716,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9abf2995858ae9840b361bd185610640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  speed: 4
+  speed: 3
   _CameraPosition: {x: 0, y: 0}
 --- !u!114 &1568174480
 MonoBehaviour:
@@ -1814,11 +1814,14 @@ MonoBehaviour:
   enemyPrefab5:
     RawGuidValue: 00000000000000000000000000000000
   enemyPrefab6:
-    RawGuidValue: 00000000000000000000000000000000
+    RawGuidValue: 6e10de8d728ed0f4d993e4dd6c2a39ec
   enemyPrefab7:
     RawGuidValue: 00000000000000000000000000000000
   spawnInterval: 3
   margin: 1
+  level1Spawn: 4
+  level2Spawn: 2.5
+  level3Spawn: 1
 --- !u!4 &1619848104
 Transform:
   m_ObjectHideFlags: 0

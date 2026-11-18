@@ -2007,9 +2007,12 @@ MonoBehaviour:
   enemyPrefab6:
     RawGuidValue: 00000000000000000000000000000000
   enemyPrefab7:
-    RawGuidValue: 00000000000000000000000000000000
+    RawGuidValue: e96cf19f2c8114f47b9b1001d9ec64b3
   spawnInterval: 2
   margin: 1
+  level1Spawn: 4
+  level2Spawn: 2.5
+  level3Spawn: 1
 --- !u!4 &1378026949
 Transform:
   m_ObjectHideFlags: 0
