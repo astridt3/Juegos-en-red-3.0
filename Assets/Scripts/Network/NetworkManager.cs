@@ -730,6 +730,13 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         // Asociar el objeto al nuevo PlayerRef.
         runner.SetPlayerObject(newPlayer, playerObject);
 
+        TeamManager teamManager = TeamManager.Instance;
+
+        if (teamManager != null)
+        {
+            teamManager.ReplacePlayerRef(reconnectData.PreviousPlayerRef, newPlayer);
+        }
+
         // Registrar nuevamente su identidad.
         connectedPlayers[newPlayer] = reconnectData.PlayerId;
 
