@@ -54,6 +54,7 @@ public class ChargeEnemy : NetworkBehaviour
         StartWaiting();
     }
 
+
     public override void FixedUpdateNetwork()
     {
         if (!Object.HasStateAuthority)
@@ -64,6 +65,8 @@ public class ChargeEnemy : NetworkBehaviour
         if (!dashing)
         {
             rb.linearVelocity = Vector2.zero;
+            
+            hasTarget = TryGetClosestPlayerPosition(out targetPosition);
 
             if (timer <= 0f)
             {
@@ -81,11 +84,15 @@ public class ChargeEnemy : NetworkBehaviour
                 return;
             }
 
-            float speed = Mathf.Min(dashSpeed, distanceToTarget.magnitude / Runner.DeltaTime);
+            float speed = Mathf.Min(
+                dashSpeed,
+                distanceToTarget.magnitude / Runner.DeltaTime
+            );
 
             rb.linearVelocity = dashDirection * speed;
         }
     }
+
 
     private void StartWaiting()
     {

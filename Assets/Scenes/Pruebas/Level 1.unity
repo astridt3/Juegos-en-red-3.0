@@ -1637,6 +1637,12 @@ MonoBehaviour:
     RawGuidValue: 44d65cf8a34d07746a66c2a0b83f9928
   enemyPrefab4:
     RawGuidValue: f489c8611fc99d745babebd900cf238e
+  enemyPrefab5:
+    RawGuidValue: b65cb44603e065145b11fd205344e232
+  enemyPrefab6:
+    RawGuidValue: 6e10de8d728ed0f4d993e4dd6c2a39ec
+  enemyPrefab7:
+    RawGuidValue: e96cf19f2c8114f47b9b1001d9ec64b3
   spawnInterval: 2
   margin: 1
 --- !u!4 &1473794526

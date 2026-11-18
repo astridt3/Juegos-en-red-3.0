@@ -22,6 +22,12 @@ public class Player : NetworkBehaviour
     [Header("Power Up PvP")]
     [SerializeField] private float powerUpDuration = 5;
 
+    [Header("Knockback")]
+    [SerializeField] private float knockbackDeceleration = 25f;
+    [SerializeField] private float maxKnockbackSpeed = 12f;
+
+    [Networked] private Vector2 KnockbackVelocity { get; set; }
+
     [Networked] public byte Team { get; set; }
     [Networked] public NetworkBool IsAlive { get; set; }
 
@@ -84,27 +90,24 @@ public class Player : NetworkBehaviour
     }
 
 
+
+
     public override void FixedUpdateNetwork()
     {
         if (!IsAlive)
             return;
 
+        Vector2 movement = Vector2.zero;
+
         if (GetInput(out NetworkInputData data))
         {
-            Vector2 movement = new Vector2(
+            movement = new Vector2(
                 data.Direction.x,
                 data.Direction.y
             );
 
-            transform.Translate(
-                movement * speed * Runner.DeltaTime
-            );
-
-            // GUARDAMOS LA ÚLTIMA DIRECCIÓN
             if (movement != Vector2.zero)
-            {
                 lastMovementDirection = movement.normalized;
-            }
 
             // DASH
             if (Object.HasStateAuthority && HasDash)
@@ -112,21 +115,38 @@ public class Player : NetworkBehaviour
                 if (Runner.SimulationTime >= DashEndTime)
                 {
                     HasDash = false;
-
                     Debug.Log("Dash Power Up terminado");
                 }
                 else
                 {
-                    NetworkButtons pressedButtons = data.Buttons.GetPressed(previousButtons);
+                    NetworkButtons pressedButtons =
+                        data.Buttons.GetPressed(previousButtons);
 
                     if (pressedButtons.IsSet(NetworkInputData.DashButton))
-                    {
                         Dash();
-                    }
                 }
 
                 previousButtons = data.Buttons;
             }
+        }
+
+        // MOVIMIENTO NORMAL + EMPUJON
+        if (Object.HasStateAuthority || Object.HasInputAuthority)
+        {
+            Vector2 totalMovement =
+                movement * speed + KnockbackVelocity;
+
+            transform.Translate(totalMovement * Runner.DeltaTime);
+        }
+
+        // REDUCE EL EMPUJON GRADUALMENTE
+        if (Object.HasStateAuthority)
+        {
+            KnockbackVelocity = Vector2.MoveTowards(
+                KnockbackVelocity,
+                Vector2.zero,
+                knockbackDeceleration * Runner.DeltaTime
+            );
         }
 
         // POWER UP PVP
@@ -134,11 +154,22 @@ public class Player : NetworkBehaviour
             Runner.SimulationTime >= PowerUpEndTime)
         {
             CanPvp = false;
-
             Debug.Log("Power Up terminado");
         }
     }
 
+    public void ApplyKnockback(Vector2 direction, float force)
+    {
+        if (!Object.HasStateAuthority || !IsAlive)
+            return;
+
+        KnockbackVelocity += direction.normalized * force;
+
+        KnockbackVelocity = Vector2.ClampMagnitude(
+            KnockbackVelocity,
+            maxKnockbackSpeed
+        );
+    }
 
     private void Dash()
     {
