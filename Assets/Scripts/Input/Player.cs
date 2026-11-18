@@ -46,6 +46,10 @@ public class Player : NetworkBehaviour
 
     [Header("Dash Visual")]
     [SerializeField] private TrailRenderer dashTrail;
+    [SerializeField] private float dashTrailDuration = 0.15f;
+
+    [Networked] private NetworkBool IsDashTrailActive { get; set; }
+    [Networked] private float DashTrailEndTime { get; set; }
 
     private NetworkButtons previousButtons;
     private Vector2 lastMovementDirection = Vector2.right;
@@ -156,6 +160,12 @@ public class Player : NetworkBehaviour
             CanPvp = false;
             Debug.Log("Power Up terminado");
         }
+
+        if (Object.HasStateAuthority && IsDashTrailActive &&
+            Runner.SimulationTime >= DashTrailEndTime)
+        {
+            IsDashTrailActive = false;
+        }
     }
 
     public void ApplyKnockback(Vector2 direction, float force)
@@ -174,6 +184,9 @@ public class Player : NetworkBehaviour
     private void Dash()
     {
         transform.position += (Vector3)(lastMovementDirection * dashDistance);
+
+        IsDashTrailActive = true;
+        DashTrailEndTime = Runner.SimulationTime + dashTrailDuration;
 
         Debug.Log("DASH!");
     }
@@ -213,7 +226,7 @@ public class Player : NetworkBehaviour
         // EFECTO VISUAL DEL DASH
         if (dashTrail != null)
         {
-            dashTrail.emitting = HasDash;
+            dashTrail.emitting = IsDashTrailActive;
         }
     }
 
