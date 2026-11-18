@@ -31,12 +31,8 @@ public class PlayerVoice : NetworkBehaviour
 
         recorder.InterestGroup = 0;
         recorder.TransmitEnabled = true;
-        recorder.RecordingEnabled = true;     
-    }
+        recorder.RecordingEnabled = true;
 
-    private void Update()
-    {
-        if (recorder == null)
-            return;
+        Debug.Log("[PlayerVoice] Recorder configurado correctamente.");
     }
 }

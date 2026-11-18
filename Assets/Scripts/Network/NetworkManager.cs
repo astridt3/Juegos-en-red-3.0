@@ -28,6 +28,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public static event Action OnReconnectedToGame;
 
     public NetworkConnectionState ConnectionState { get; private set; } = NetworkConnectionState.Disconnected;
+    public bool IsConnected => runner != null && runner.IsRunning;
+    public NetworkRunner Runner => runner;
 
     [Header("Network components")]
     [SerializeField] private NetworkSceneManagerDefault sceneManager;
@@ -41,9 +43,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("Spawns")]
     public Transform[] spawnPoints;
-
-    [Header("Network menu")]
-    public NetworkMenu netMenu;
 
     [Header("Network pool")]
     [SerializeField] private PooledNetworkObjectProvider objectProvider;
@@ -72,6 +71,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             Debug.LogError("[NetworkManager] No se ha encontrado FusionVoiceClient.");
         }
+
+        runner.AddCallbacks(this);
+        runner.AddCallbacks(voiceClient);
 
         inputSystemActions = new InputSystemActions();
     }
@@ -115,24 +117,18 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     #region Start game modes
     public void StartGameHost(string sessionName)
     {
-        if (netMenu != null)
-            netMenu.CreatingServer();
 
         _ = StartGame(GameMode.Host, sessionName);
     }
 
     public void StartGameClient(string sessionName)
     {
-        if (netMenu != null)
-            netMenu.JoiningServer();
 
         _ = StartGame(GameMode.Client, sessionName);
     }
 
     public void QuickPlay()
     {
-        if (netMenu != null)
-            netMenu.JoiningServer();
 
         _ = StartGame(GameMode.AutoHostOrClient);
     }
@@ -186,12 +182,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         currentSessionName = runner.SessionInfo.Name;
 
         Debug.Log($"[NetworkManager] Conexión establecida con: {currentSessionName}");
-
-        if (netMenu != null)
-        {
-            netMenu.CreatingServerClose();
-            netMenu.JoiningServerClose();
-        }
 
         isReconnecting = false;
 
@@ -373,19 +363,48 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public async void ReturnToMainMenu()
     {
-        if (runner != null)
-        {
-            await RecreateRunner();
-        }
+        if (isStartingGame)
+            return;
+
+        await ShutdownRunner();
+
+        if (this == null)
+            return;
 
         currentSessionName = null;
 
         isReconnecting = false;
         isStartingGame = false;
 
+        connectedPlayers.Clear();
+        disconnectedPlayers.Clear();
+        playerSpawnAssignments.Clear();
+
         SetConnectionState(NetworkConnectionState.Disconnected);
 
         SceneManager.LoadScene(0);
+    }
+
+    private async Task ShutdownRunner()
+    {
+        NetworkRunner oldRunner = runner;
+
+        // Desvincular el Runner actual.
+        runner = null;
+
+        if (oldRunner == null)
+            return;
+
+        if (oldRunner.IsRunning)
+        {
+            Debug.Log("[NetworkManager] Apagando Runner anterior.");
+            await oldRunner.Shutdown();
+        }
+
+        if (oldRunner != null)
+        {
+            Destroy(oldRunner);
+        }
     }
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
@@ -447,20 +466,22 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadDone(NetworkRunner runner)
     {
+        if (this.runner != runner)
+            return;
+
         int sceneIndex = SceneManager.GetActiveScene().buildIndex;
 
         if (sceneIndex == 0)
         {
-            safeSpawnManager = null;
-
             NetworkMenu menu = FindFirstObjectByType<NetworkMenu>();
 
             if (menu != null)
             {
-                netMenu = menu;
                 menu.SetActiveRunner(runner);
-                menu.ShowTeamSelectionScreen();
+                Debug.Log("[NetworkManager] Runner asignado al nuevo NetworkMenu.");
             }
+
+            safeSpawnManager = null;
 
             MainMenu teamSelectPanel = FindFirstObjectByType<MainMenu>();
 
@@ -696,6 +717,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         // Crear un Runner nuevo.
         runner = gameObject.AddComponent<NetworkRunner>();
+
+        runner.AddCallbacks(this);
+        runner.AddCallbacks(voiceClient);
 
         Debug.Log("[NetworkManager] Nuevo NetworkRunner preparado.");
     }

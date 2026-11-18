@@ -1,21 +1,14 @@
 using Fusion;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour
 {
+    public static event System.Action<byte> OnMatchEnded;
+
     [Networked]public byte WinningTeam { get; set; }
 
     private bool matchStarted;
     private bool networkReady;
-
-    [SerializeField] private GameObject endGamePanel;
-    [SerializeField] private TMP_Text resultText;
-    [SerializeField] private Button restartButton;
-    [SerializeField] private Button teamSelectionButton;
-    
-    private bool ShowPanel;
+    private byte lastDisplayedWinner;
 
     public override void Spawned()
     {
@@ -26,13 +19,6 @@ public class GameManager : NetworkBehaviour
             WinningTeam = 0;
             matchStarted = false;
         }
-
-        if (endGamePanel != null)
-        {
-            endGamePanel.SetActive(false);
-        }
-
-        ShowPanel = false;
     }
 
     public override void FixedUpdateNetwork()
@@ -47,7 +33,6 @@ public class GameManager : NetworkBehaviour
             return;
 
         matchStarted = true;
-
         CheckWinner();
     }
 
@@ -59,10 +44,12 @@ public class GameManager : NetworkBehaviour
         if (WinningTeam == 0)
             return;
 
-        if (ShowPanel)
+        if (lastDisplayedWinner == WinningTeam)
             return;
 
-        ShowEndGamePanel();
+        lastDisplayedWinner = WinningTeam;
+
+        OnMatchEnded?.Invoke(WinningTeam);
     }
 
     private bool AreAllPlayersReady()
@@ -73,14 +60,12 @@ public class GameManager : NetworkBehaviour
         {
             foundPlayer = true;
 
-            NetworkObject playerObject =
-                Runner.GetPlayerObject(playerRef);
+            NetworkObject playerObject = Runner.GetPlayerObject(playerRef);
 
             if (playerObject == null)
                 return false;
 
-            Player player =
-                playerObject.GetComponent<Player>();
+            Player player = playerObject.GetComponent<Player>();
 
             if (player == null)
                 return false;
@@ -105,12 +90,10 @@ public class GameManager : NetworkBehaviour
         if (player.Team == 1)
         {
             WinningTeam = 1;
-            Debug.Log("¡Blue Team llegó primero y ganó!");
         }
         else if (player.Team == 2)
         {
             WinningTeam = 2;
-            Debug.Log("¡Red Team llegó primero y ganó!");
         }
     }
 
@@ -147,92 +130,42 @@ public class GameManager : NetworkBehaviour
         if (!team1Alive && team2Alive)
         {
             WinningTeam = 2;
-
-            Debug.Log("¡Gana el equipo 2!");
-
         }
         else if (team1Alive && !team2Alive)
         {
             WinningTeam = 1;
-
-            Debug.Log("¡Gana el equipo 1!");
-
         }
         else if (!team1Alive && !team2Alive)
         {
             WinningTeam = 3;
-
-            Debug.Log("¡Empate!");
-
         }
     }
 
-    private void ShowEndGamePanel()
+    private void RestartLevel(int sceneIndex)
     {
-        ShowPanel = true;
-
-        if (endGamePanel == null)
-            return;
-
-        endGamePanel.SetActive(true);
-
-        if (resultText != null)
-        {
-            if (WinningTeam == 1)
-            {
-                resultText.text = "¡BLUE TEAM WON!";
-            }
-            else if (WinningTeam == 2)
-            {
-                resultText.text = "¡RED TEAM WON!";
-            }
-            else if (WinningTeam == 3)
-            {
-                resultText.text = "¡DRAW!";
-            }
-        }
-    }
-
-    public void RestartLevel1()
-    {
-        RestartLevel1Rpc();
+        Runner.LoadScene(SceneRef.FromIndex(sceneIndex));
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void RestartLevel1Rpc()
+    public void RPC_RestartLevel1()
     {
-        Debug.Log("Reiniciando nivel 1.");
-
-        Runner.LoadScene(SceneRef.FromIndex(1));
-    }
-    public void RestartLevel2()
-    {
-        RestartLevel2Rpc();
-    }
-    private void RestartLevel2Rpc()
-    {
-        Debug.Log("Reiniciando nivel 2.");
-
-        Runner.LoadScene(SceneRef.FromIndex(2));
-    }
-    public void RestartLevel3()
-    {
-        RestartLevel3Rpc();
-    }
-    private void RestartLevel3Rpc()
-    {
-        Debug.Log("Reiniciando nivel 3.");
-
-        Runner.LoadScene(SceneRef.FromIndex(3));
-    }
-
-    public void ReturnToTeamSelection()
-    {
-        ReturnToTeamSelectionRpc();
+        RestartLevel(1);
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void ReturnToTeamSelectionRpc()
+    public void RPC_RestartLevel2()
+    {
+        RestartLevel(2);
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_RestartLevel3()
+    {
+        RestartLevel(3);
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_ReturnToTeamSelection()
     {
         TeamManager teamManager = TeamManager.Instance;
 
@@ -240,8 +173,6 @@ public class GameManager : NetworkBehaviour
         {
             teamManager.ResetTeams();
         }
-
-        Debug.Log("Volviendo a selección de equipos.");
 
         Runner.LoadScene(SceneRef.FromIndex(0));
     }
@@ -258,10 +189,6 @@ public class GameManager : NetworkBehaviour
         if (networkManager != null)
         {
             networkManager.ReturnToMainMenu();
-        }
-        else
-        {
-            Debug.LogError("No se encontró NetworkManager para volver al menú.");
         }
     }
 }

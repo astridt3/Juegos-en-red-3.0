@@ -490,7 +490,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1940116923}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: ReturnToTeamSelection
+        m_MethodName: RPC_ReturnToTeamSelection
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2062,10 +2062,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
   _WinningTeam: 0
-  endGamePanel: {fileID: 761707122}
-  resultText: {fileID: 1075077456}
-  restartButton: {fileID: 1994775944}
-  teamSelectionButton: {fileID: 0}
 --- !u!114 &1940116924
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2197,7 +2193,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1940116923}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: RestartLevel1
+        m_MethodName: RPC_RestartLevel1
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

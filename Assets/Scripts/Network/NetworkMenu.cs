@@ -27,6 +27,47 @@ public class NetworkMenu : MonoBehaviour
     [Header("Panel inicial")]
     [SerializeField] private CanvasGroup mainMenuPanel;
 
+    private void Awake()
+    {
+        networkManager = FindFirstObjectByType<NetworkManager>();
+
+        if (networkManager == null)
+        {
+            Debug.LogError("NetworkManager no encontrado.");
+        }
+    }
+
+    private void OnEnable()
+    {
+        NetworkManager.OnConnectedToGame += ConnectedToGame;
+        NetworkManager.OnConnectionFailed += ConnectionFailed;
+        NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
+        NetworkManager.OnReconnectedToGame += ReconnectedToGame;
+    }
+
+    private void Start()
+    {
+        if (networkManager == null)
+            return;
+
+        if (networkManager.IsConnected)
+        {
+            ShowTeamSelectionScreen();
+        }
+        else
+        {
+            ShowMainMenu();
+        }
+    }
+
+    private void OnDisable()
+    {
+        NetworkManager.OnConnectedToGame -= ConnectedToGame;
+        NetworkManager.OnConnectionFailed -= ConnectionFailed;
+        NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
+        NetworkManager.OnReconnectedToGame -= ReconnectedToGame;
+    }
+
     public void ShowTeamSelectionScreen()
     {
         SetPanel(mainMenuPanel, false);
@@ -53,25 +94,19 @@ public class NetworkMenu : MonoBehaviour
         panel.interactable = visible;
         panel.blocksRaycasts = visible;
     }
-    private void OnEnable()
-    {
-        NetworkManager.OnConnectedToGame += ConnectedToGame;
-        NetworkManager.OnConnectionFailed += ConnectionFailed;
-        NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
-        NetworkManager.OnDisconnectedFromGame += DisconnectedFromGame;
-    }
-
-    private void OnDisable()
-    {
-        NetworkManager.OnConnectedToGame -= ConnectedToGame;
-        NetworkManager.OnConnectionFailed -= ConnectionFailed;
-        NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
-        NetworkManager.OnDisconnectedFromGame -= DisconnectedFromGame;
-    }
 
     private void ConnectedToGame()
     {
+        // Cerrar paneles de conexión.
+        SetPanel(serverCreating, false);
+        SetPanel(serverJoining, false);
+        SetPanel(quickmatchCreating, false);
+        SetPanel(connectionError, false);
+
+        // Ocultar menú principal.
         Hide();
+
+        // Mostrar selección de equipos.
         ShowTeams();
     }
 
@@ -83,6 +118,8 @@ public class NetworkMenu : MonoBehaviour
             return;
         }
 
+        CreatingServer();
+
         networkManager.StartGameHost(input.text);
     }
 
@@ -93,6 +130,8 @@ public class NetworkMenu : MonoBehaviour
             Debug.LogWarning("Escribí un nombre para la sala.");
             return;
         }
+
+        JoiningServer();
 
         networkManager.StartGameClient(input.text);
     }
@@ -227,6 +266,9 @@ public class NetworkMenu : MonoBehaviour
 
     public void ShowLevelSelector()
     {
+        if (networkManager != null)
+            runner = networkManager.Runner;
+
         // Ocultar equipos
         selectTeams.alpha = 0;
         selectTeams.interactable = false;
