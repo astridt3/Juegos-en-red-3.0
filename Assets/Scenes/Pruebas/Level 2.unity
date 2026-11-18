@@ -1806,9 +1806,9 @@ MonoBehaviour:
   enemyPrefab:
     RawGuidValue: c21904350e293b744aa8e1c137c1b437
   enemyPrefab2:
-    RawGuidValue: 00000000000000000000000000000000
+    RawGuidValue: 56c86c9df1f9dbc49b3ada7e811bc85c
   enemyPrefab3:
-    RawGuidValue: 00000000000000000000000000000000
+    RawGuidValue: 44d65cf8a34d07746a66c2a0b83f9928
   enemyPrefab4:
     RawGuidValue: 00000000000000000000000000000000
   enemyPrefab5:
