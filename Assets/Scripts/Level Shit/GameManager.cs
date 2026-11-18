@@ -1,3 +1,4 @@
+using UnityEngine;
 using Fusion;
 
 public class GameManager : NetworkBehaviour
@@ -184,11 +185,17 @@ public class GameManager : NetworkBehaviour
 
     public void ReturnToMainMenu()
     {
+        Debug.LogError("[DEBUG] ReturnToMainMenu ejecutado.");
+
         NetworkManager networkManager = FindFirstObjectByType<NetworkManager>();
 
         if (networkManager != null)
         {
             networkManager.ReturnToMainMenu();
+        }
+        else
+        {
+            Debug.LogError("[DEBUG] NetworkManager no encontrado.");
         }
     }
 }

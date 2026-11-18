@@ -1,6 +1,6 @@
-
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameUIController : MonoBehaviour
@@ -13,6 +13,9 @@ public class GameUIController : MonoBehaviour
     [SerializeField] private GameObject connectionPanel;
     [SerializeField] private GameObject reconnectingPanel;
     [SerializeField] private Button reconnectButton;
+
+    [Header("Host disconnection")]
+    [SerializeField] private GameObject hostDisconnectPanel;
 
     private NetworkManager networkManager;
 
@@ -33,6 +36,7 @@ public class GameUIController : MonoBehaviour
 
         NetworkManager.OnDisconnectedFromGame += ShowDisconnected;
         NetworkManager.OnReconnectedToGame += HideConnectionPanels;
+        NetworkManager.OnHostDisconnected += ShowHostDisconnectionPanel;
 
         if (reconnectButton != null)
             reconnectButton.onClick.AddListener(Reconnect);
@@ -44,6 +48,7 @@ public class GameUIController : MonoBehaviour
 
         NetworkManager.OnDisconnectedFromGame -= ShowDisconnected;
         NetworkManager.OnReconnectedToGame -= HideConnectionPanels;
+        NetworkManager.OnHostDisconnected -= ShowHostDisconnectionPanel;
 
         if (reconnectButton != null)
             reconnectButton.onClick.RemoveListener(Reconnect);
@@ -117,5 +122,16 @@ public class GameUIController : MonoBehaviour
 
         if (reconnectButton != null)
             reconnectButton.interactable = true;
+    }
+
+    private void ShowHostDisconnectionPanel()
+    {
+        if (hostDisconnectPanel != null)
+            hostDisconnectPanel.SetActive(true);
+    }
+
+    public void ReturnToMenuAfterHostDisconnect()
+    {
+        SceneManager.LoadScene(0);
     }
 }

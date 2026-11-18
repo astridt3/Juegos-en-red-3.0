@@ -27,6 +27,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public static event Action OnDisconnectedFromGame;
     public static event Action OnReconnectedToGame;
 
+    public static event Action OnHostDisconnected;
+
     public NetworkConnectionState ConnectionState { get; private set; } = NetworkConnectionState.Disconnected;
     public bool IsConnected => runner != null && runner.IsRunning;
     public NetworkRunner Runner => runner;
@@ -58,6 +60,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     private Dictionary<string, int> playerSpawnAssignments = new Dictionary<string, int>();
 
+    private bool isReturningToMainMenu;
+
     private void Awake()
     {
         voiceClient = GetComponent<FusionVoiceClient>();
@@ -65,12 +69,18 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         if (runner == null)
         {
             Debug.LogError("[NetworkManager] No se ha asignado el NetworkRunner.");
+            enabled = false;
+            return;
         }
 
         if (voiceClient == null)
         {
             Debug.LogError("[NetworkManager] No se ha encontrado FusionVoiceClient.");
+            enabled = false;
+            return;
         }
+
+        runner.ProvideInput = true;
 
         runner.AddCallbacks(this);
         runner.AddCallbacks(voiceClient);
@@ -139,6 +149,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             return;
 
         isStartingGame = true;
+        isReturningToMainMenu = false;
 
         bool wasReconnecting = isReconnecting;
 
@@ -210,6 +221,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
+
         if (!runner.IsServer)
             return;
 
@@ -224,9 +236,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         connectedPlayers[player] = playerId;
 
         // ¿Es un jugador que está regresando?
-        if (disconnectedPlayers.TryGetValue(
-            playerId,
-            out PlayerReconnectData reconnectData))
+        if (disconnectedPlayers.TryGetValue(playerId, out PlayerReconnectData reconnectData))
         {
             float elapsedTime = Time.time - reconnectData.DisconnectTime;
 
@@ -241,8 +251,21 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             ReleaseDisconnectedPlayer(runner, playerId);
         }
 
-        // Jugador nuevo.
-        SpawnPlayer(runner, player);
+        Debug.Log($"[DEBUG] Creando Player para {player}");
+
+        // Jugador nuevo: comprobar si ya tiene un objeto asociado.
+        NetworkObject existingPlayer = runner.GetPlayerObject(player);
+
+        if (existingPlayer == null)
+        {
+            Debug.Log($"[NetworkManager] Creando Player para {player}.");
+
+            SpawnPlayer(runner, player);
+        }
+        else
+        {
+            Debug.LogWarning($"[NetworkManager] El jugador {player} ya tiene un Player asociado. " + "Se evita crear un duplicado.");
+        }
     }
 
     private void SpawnPlayer(NetworkRunner runner, PlayerRef player)
@@ -341,16 +364,26 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     }
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
-#pragma warning restore UNT0006 // Incorrect message signature
+#pragma warning restore UNT0006
     {
-        if (this.runner != runner)
-            return;
+        Debug.LogError(
+            $"[DEBUG DISCONNECT] Callback recibido. " +
+            $"IsServer: {runner.IsServer} | " +
+            $"IsRunning: {runner.IsRunning} | " +
+            $"Reason: {reason}"
+        );
 
-        Debug.LogWarning($"[NetworkManager] Se perdió la conexión. Motivo: {reason}");
+        if (this.runner != runner)
+        {
+            Debug.LogWarning("[DEBUG DISCONNECT] Runner diferente al actual.");
+            return;
+        }
 
         SetConnectionState(NetworkConnectionState.Disconnected);
 
         OnDisconnectedFromGame?.Invoke();
+
+        OnHostDisconnected?.Invoke();
     }
 
     public void OnConnectFailed(NetworkRunner runner, NetAddress remoteAddress, NetConnectFailedReason reason)
@@ -365,6 +398,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (isStartingGame)
             return;
+
+        isReturningToMainMenu = true;
 
         await ShutdownRunner();
 
@@ -409,13 +444,23 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnShutdown(NetworkRunner runner, ShutdownReason shutdownReason)
     {
-        // Ignorar callbacks de runners que ya no son el actual.
         if (this.runner != runner)
             return;
 
         Debug.Log($"[NetworkManager] Runner apagado. Motivo: {shutdownReason}");
 
-        if (ConnectionState != NetworkConnectionState.Failed && ConnectionState != NetworkConnectionState.Reconnecting)
+        // Comprobar si el cliente perdió al host inesperadamente.
+        if (runner.IsClient &&
+            ConnectionState == NetworkConnectionState.Connected &&
+            !isReturningToMainMenu)
+        {
+            Debug.LogWarning("[NetworkManager] El host abandonó la partida.");
+
+            OnHostDisconnected?.Invoke();
+        }
+
+        if (ConnectionState != NetworkConnectionState.Failed &&
+            ConnectionState != NetworkConnectionState.Reconnecting)
         {
             SetConnectionState(NetworkConnectionState.Disconnected);
         }
@@ -719,7 +764,11 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         runner = gameObject.AddComponent<NetworkRunner>();
 
         runner.AddCallbacks(this);
-        runner.AddCallbacks(voiceClient);
+
+        if (voiceClient != null)
+        {
+            runner.AddCallbacks(voiceClient);
+        }
 
         Debug.Log("[NetworkManager] Nuevo NetworkRunner preparado.");
     }
