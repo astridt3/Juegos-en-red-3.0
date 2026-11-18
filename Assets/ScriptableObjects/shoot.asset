@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: shoot
   m_EditorClassIdentifier: Assembly-CSharp::AudioDefinition
   clips:
-  - {fileID: 8300000, guid: d7a22b333cae6ab45a1ef47a77fa720f, type: 3}
+  - {fileID: 8300000, guid: 8824f44c179e7d94cb89e05b42f736e7, type: 3}
   mixerGroup: {fileID: -3289725595707435662, guid: bf6ca22e2c083c840be57a476f59d8c5, type: 2}
   loop: 0
   volume: 1

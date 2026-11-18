@@ -17,6 +17,9 @@ public class BoleadoraEnemy : NetworkBehaviour
     [SerializeField] private Transform firePoint;
     [SerializeField] private float projectileSpeed = 15f;
 
+    [SerializeField] private AudioDefinition boleadora;
+    private IAudioService audioService;
+
     [Header("Animation")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Sprite standingSprite;
@@ -49,7 +52,10 @@ public class BoleadoraEnemy : NetworkBehaviour
         Throwing,
         Recovery
     }
-
+    private void Start()
+    {
+        audioService = ServiceLocator.Get<IAudioService>();
+    }
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -228,7 +234,8 @@ public class BoleadoraEnemy : NetworkBehaviour
             if (projectile != null)
                 projectile.Launch(AimDirection, projectileSpeed);
         }
-
+        if (audioService != null && boleadora != null)
+            audioService.PlaySFX(boleadora);
         AnimationFrame = 2;
         currentPhase = EnemyPhase.Throwing;
         timer = throwDuration;

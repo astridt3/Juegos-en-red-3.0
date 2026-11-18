@@ -148,6 +148,7 @@ MonoBehaviour:
     RawGuidValue: 865d3661621563b488ce12f631073366
   firePoint: {fileID: 7446370575718454083}
   projectileSpeed: 12
+  boleadora: {fileID: 11400000, guid: ea655f6f5621f8244b729309445b7c93, type: 2}
   spriteRenderer: {fileID: 5548502793149692167}
   standingSprite: {fileID: 5006463096370413784, guid: 531c15d39036c46439276d8d24068ee8, type: 3}
   spinningSprite: {fileID: 4279654595314221633, guid: 531c15d39036c46439276d8d24068ee8, type: 3}
