@@ -1,10 +1,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
-using Unity.Services.Core;
 using Unity.Services.CloudSave;
+using Unity.Services.Core;
 using Unity.Services.Leaderboards;
 using UnityEngine;
 
@@ -108,5 +109,44 @@ public class CloudS : MonoBehaviour
             "Mi posición: " + (jugador.Rank + 1) +
             " | Victorias: " + jugador.Score
         );
+    }
+    public async Task<string> ObtenerRankingTexto()
+    {
+        await AsegurarServicios();
+
+        var resultado = await LeaderboardsService.Instance.GetScoresAsync(
+            leaderboardId,
+            new GetScoresOptions
+            {
+                Offset = 0,
+                Limit = 3
+            }
+        );
+
+        if (resultado.Results.Count == 0)
+        {
+            return "Todavía no hay jugadores en el ranking.";
+        }
+
+        StringBuilder texto = new StringBuilder();
+
+        texto.AppendLine("POS.       JUGADOR       VICTORIAS");
+        texto.AppendLine("--------------------------------");
+
+        foreach (var jugador in resultado.Results)
+        {
+            string id = jugador.PlayerId;
+
+            if (id.Length > 8)
+                id = id.Substring(0, 8);
+
+            texto.AppendLine(
+                (jugador.Rank + 1) + "º          " +
+                "Jugador " + id + "          " +
+                jugador.Score.ToString("0")
+            );
+        }
+
+        return texto.ToString();
     }
 }

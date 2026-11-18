@@ -13,6 +13,7 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField] private GameObject endGamePanel;
     [SerializeField] private TMP_Text resultText;
+    [SerializeField] private TMP_Text rankingText;
     [SerializeField] private Button restartButton;
     [SerializeField] private Button teamSelectionButton;
 
@@ -78,47 +79,46 @@ public class GameManager : NetworkBehaviour
     }
     private async void RegistrarResultadoLocal()
     {
-        if (WinningTeam != 1 && WinningTeam != 2)
-        {
-            resultadoEnviado = true;
-            return;
-        }
-
-        NetworkObject jugadorLocal =
-            Runner.GetPlayerObject(Runner.LocalPlayer);
-
-        if (jugadorLocal == null)
-            return;
-
-        Player player = jugadorLocal.GetComponent<Player>();
-
-        if (player == null)
-            return;
-
-        if (cloudS == null)
-        {
-            Debug.LogError("No se asignó CloudS en GameManager.");
-            return;
-        }
-
         resultadoEnviado = true;
 
-        if (player.Team == WinningTeam)
-        {
-            try
-            {
-                await cloudS.RegistrarVictoria();
+        if (rankingText != null)
+            rankingText.text = "Cargando ranking...";
 
-                Debug.Log("¡Victoria registrada en Unity Leaderboards!");
-            }
-            catch (Exception e)
+        try
+        {
+            if (WinningTeam == 1 || WinningTeam == 2)
             {
-                Debug.LogError("Error registrando la victoria: " + e.Message);
+                NetworkObject jugadorLocal =
+                    Runner.GetPlayerObject(Runner.LocalPlayer);
+
+                if (jugadorLocal != null)
+                {
+                    Player player = jugadorLocal.GetComponent<Player>();
+
+                    if (player != null && player.Team == WinningTeam)
+                    {
+                        await cloudS.RegistrarVictoria();
+
+                        Debug.Log("¡Victoria registrada en Unity Leaderboards!");
+                    }
+                    else
+                    {
+                        Debug.Log("Partida perdida. No se suman victorias.");
+                    }
+                }
+            }
+
+            if (cloudS != null && rankingText != null)
+            {
+                rankingText.text = await cloudS.ObtenerRankingTexto();
             }
         }
-        else
+        catch (Exception e)
         {
-            Debug.Log("Partida perdida. No se suman victorias.");
+            Debug.LogError("Error procesando el resultado: " + e.Message);
+
+            if (rankingText != null)
+                rankingText.text = "No se pudo cargar el ranking.";
         }
     }
     private bool AreAllPlayersReady()
@@ -235,18 +235,15 @@ public class GameManager : NetworkBehaviour
         if (resultText != null)
         {
             if (WinningTeam == 1)
-            {
                 resultText.text = "¡BLUE TEAM WON!";
-            }
             else if (WinningTeam == 2)
-            {
                 resultText.text = "¡RED TEAM WON!";
-            }
             else if (WinningTeam == 3)
-            {
                 resultText.text = "¡DRAW!";
-            }
         }
+
+        if (rankingText != null)
+            rankingText.text = "Cargando ranking...";
     }
 
 
