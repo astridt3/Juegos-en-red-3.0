@@ -16,6 +16,8 @@ public class Player : NetworkBehaviour
 
     [SerializeField] private GameObject indicator;
 
+    [SerializeField] private NetworkPrefabRef bloodPrefab;
+
     private SpriteRenderer blueSpriteRenderer;
     private SpriteRenderer redSpriteRenderer;
 
@@ -265,7 +267,13 @@ public class Player : NetworkBehaviour
 
         Debug.Log("Power Up activado");
     }
+    private void SpawnBlood()
+    {
+        if (!Object.HasStateAuthority)
+            return;
 
+        Runner.Spawn(bloodPrefab, transform.position, Quaternion.identity);
+    }
 
     public void Kill()
     {
@@ -276,6 +284,7 @@ public class Player : NetworkBehaviour
             return;
 
         IsAlive = false;
+        SpawnBlood();
 
         Debug.Log("Jugador " + Object.InputAuthority + " murió.");
     }

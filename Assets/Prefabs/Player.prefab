@@ -940,6 +940,8 @@ MonoBehaviour:
   team1Color: {r: 0.8254717, g: 0.8254717, b: 1, a: 1}
   team2Color: {r: 1, g: 0.7783019, b: 0.7783019, a: 1}
   indicator: {fileID: 6147906051137022004}
+  bloodPrefab:
+    RawGuidValue: e992ec59ad722844c83ff61997b68159
   powerUpDuration: 5
   knockbackDeceleration: 15
   maxKnockbackSpeed: 12
