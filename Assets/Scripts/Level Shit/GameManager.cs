@@ -118,7 +118,7 @@ public class GameManager : NetworkBehaviour
             Debug.LogError("Error procesando el resultado: " + e.Message);
 
             if (rankingText != null)
-                rankingText.text = "No se pudo cargar el ranking.";
+                rankingText.text = "Could not load leaderboard.";
         }
     }
     private bool AreAllPlayersReady()
@@ -243,7 +243,7 @@ public class GameManager : NetworkBehaviour
         }
 
         if (rankingText != null)
-            rankingText.text = "Cargando ranking...";
+            rankingText.text = "Loading leaderboard...";
     }
 
 

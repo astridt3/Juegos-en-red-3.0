@@ -696,7 +696,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Men\xFA"
+  m_text: Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
   m_sharedMaterial: {fileID: 5361305874736950840, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
@@ -1277,7 +1277,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 713028263}
-  - {fileID: 1287738377}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1763,6 +1762,7 @@ RectTransform:
   - {fileID: 1398683963}
   - {fileID: 113376229}
   - {fileID: 346962174}
+  - {fileID: 1287738377}
   m_Father: {fileID: 489376419}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2160,7 +2160,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 453289299}
-  m_Father: {fileID: 489376419}
+  m_Father: {fileID: 713028263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2868,7 +2868,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Elegir equipo
+  m_text: Select Team
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
   m_sharedMaterial: {fileID: 5361305874736950840, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}

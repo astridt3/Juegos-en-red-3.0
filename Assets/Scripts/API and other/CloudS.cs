@@ -116,21 +116,14 @@ public class CloudS : MonoBehaviour
 
         var resultado = await LeaderboardsService.Instance.GetScoresAsync(
             leaderboardId,
-            new GetScoresOptions
-            {
-                Offset = 0,
-                Limit = 3
-            }
-        );
+            new GetScoresOptions { Offset = 0, Limit = 3 });
 
         if (resultado.Results.Count == 0)
-        {
-            return "Todavía no hay jugadores en el ranking.";
-        }
+            return "No players in the leaderboard yet.";
 
         StringBuilder texto = new StringBuilder();
 
-        texto.AppendLine("POS.       JUGADOR       VICTORIAS");
+        texto.AppendLine("RANK       PLAYER       WINS");
         texto.AppendLine("--------------------------------");
 
         foreach (var jugador in resultado.Results)
@@ -141,10 +134,9 @@ public class CloudS : MonoBehaviour
                 id = id.Substring(0, 8);
 
             texto.AppendLine(
-                (jugador.Rank + 1) + "º          " +
-                "Jugador " + id + "          " +
-                jugador.Score.ToString("0")
-            );
+                (jugador.Rank + 1) + "°          " +
+                "Player " + id + "          " +
+                jugador.Score.ToString("0"));
         }
 
         return texto.ToString();

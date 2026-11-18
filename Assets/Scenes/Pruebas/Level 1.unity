@@ -383,8 +383,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
+  m_sharedMaterial: {fileID: 5361305874736950840, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1858,7 +1858,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Elegir equipo
+  m_text: Select Team
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
   m_sharedMaterial: {fileID: 5361305874736950840, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
@@ -2438,7 +2438,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Men\xFA"
+  m_text: Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
   m_sharedMaterial: {fileID: 5361305874736950840, guid: 94473ec3a9b347942922c0d5de0d62df, type: 2}
