@@ -119,7 +119,7 @@ MonoBehaviour:
     m_Bits: 8
   initialHealth: 10
   moveSpeed: 3
-  attackSound: {fileID: 11400000, guid: d24beccffffd8cb4d95e5c003c9bae5f, type: 2}
+  attackSound: {fileID: 0}
   _Health: 0
 --- !u!50 &1824040223516689201
 Rigidbody2D:

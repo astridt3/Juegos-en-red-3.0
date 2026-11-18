@@ -1511,3 +1511,4 @@ MonoBehaviour:
   distance: 3
   speed: 200
   owner: {fileID: -744770551630664326}
+  MuerteEnemy: {fileID: 11400000, guid: 47c07effb47bc1b489d6af2a6bdfe69d, type: 2}

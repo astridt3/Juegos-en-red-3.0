@@ -7,9 +7,13 @@ public class Ball : MonoBehaviour
     [SerializeField] private float distance = 2f;
     [SerializeField] private float speed = 180f;
     [SerializeField] private Player owner;
-
+    [SerializeField] private AudioDefinition MuerteEnemy;
+    private IAudioService audioService;
     private float angle;
-
+    private void Start()
+    {
+        audioService = ServiceLocator.Get<IAudioService>();
+    }
     private void Update()
     {
         angle += speed * Time.deltaTime;
@@ -37,6 +41,8 @@ public class Ball : MonoBehaviour
                 return;
 
             enemy.Runner.Despawn(enemy.Object);
+            if (audioService != null && MuerteEnemy != null)
+                audioService.PlaySFX(MuerteEnemy);
             return;
         }
 

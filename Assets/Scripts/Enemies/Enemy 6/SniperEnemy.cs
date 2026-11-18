@@ -27,6 +27,9 @@ public class SniperEnemy : NetworkBehaviour
     [SerializeField] private Sprite recoilSprite;
     [SerializeField] private Sprite reloadingSprite;
 
+    [SerializeField] private AudioDefinition disparo;
+    private IAudioService audioService;
+
     [SerializeField] private float crouchDuration = 0.2f;
     [SerializeField] private float shotFrameDuration = 0.12f;
 
@@ -58,7 +61,10 @@ public class SniperEnemy : NetworkBehaviour
         Aiming,
         Shooting
     }
-
+    private void Start()
+    {
+        audioService = ServiceLocator.Get<IAudioService>();
+    }
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -274,6 +280,8 @@ public class SniperEnemy : NetworkBehaviour
             if (projectile != null)
                 projectile.Launch(AimDirection, projectileSpeed);
         }
+        if (audioService != null && disparo != null)
+            audioService.PlaySFX(disparo);
 
         IsAiming = false;
         AnimationFrame = 3;

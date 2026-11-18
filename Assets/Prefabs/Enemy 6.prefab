@@ -267,6 +267,7 @@ MonoBehaviour:
   firingSprite: {fileID: -2900880187411158134, guid: 8291ebb39c66f0b46aaf796ea64033ee, type: 3}
   recoilSprite: {fileID: 1517769019871510489, guid: 8291ebb39c66f0b46aaf796ea64033ee, type: 3}
   reloadingSprite: {fileID: 515463239986230909, guid: 8291ebb39c66f0b46aaf796ea64033ee, type: 3}
+  disparo: {fileID: 11400000, guid: b5e8cb065d5aaba4da703fcdfd56e0f0, type: 2}
   crouchDuration: 0.2
   shotFrameDuration: 0.12
   initialHealth: 10
