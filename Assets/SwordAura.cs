@@ -93,9 +93,8 @@ public class SwordAura : MonoBehaviour
         shape.shapeType = ParticleSystemShapeType.Circle;
         shape.radius = radius;
 
-        var velocity = fireParticles.velocityOverLifetime;
-        velocity.enabled = true;
-        velocity.y = new ParticleSystem.MinMaxCurve(0.5f, particleHeight);
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.startRotation = 0f;
 
         var color = fireParticles.colorOverLifetime;
         color.enabled = true;
