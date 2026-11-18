@@ -1077,6 +1077,7 @@ MonoBehaviour:
     RawValue: 0
   dashTrail: {fileID: 5284714804469608116}
   dashTrailDuration: 0.15
+  Muerte: {fileID: 11400000, guid: d24beccffffd8cb4d95e5c003c9bae5f, type: 2}
 --- !u!114 &7658017122763676522
 MonoBehaviour:
   m_ObjectHideFlags: 0

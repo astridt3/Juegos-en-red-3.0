@@ -58,8 +58,13 @@ public class Player : NetworkBehaviour
     private Vector2 lastMovementDirection = Vector2.right;
 
     private int lastTeam = -1;
+    [SerializeField] private AudioDefinition Muerte;
+    private IAudioService audioService;
 
-
+    private void Start()
+    {
+        audioService = ServiceLocator.Get<IAudioService>();
+    }
     public override void Spawned()
     {
         // INDICATOR
@@ -288,6 +293,8 @@ public class Player : NetworkBehaviour
 
         IsAlive = false;
         SpawnBlood();
+        if (audioService != null && Muerte != null)
+            audioService.PlaySFX(Muerte);
 
         Debug.Log("Jugador " + Object.InputAuthority + " murió.");
     }
