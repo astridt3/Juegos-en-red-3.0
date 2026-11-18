@@ -8,6 +8,9 @@
         },
         {
             "m_Id": "14e0e5c484b54a52bb4d9e5d67ba24d2"
+        },
+        {
+            "m_Id": "7dfc26d923544721a551f7ffdd9ad83b"
         }
     ],
     "m_Keywords": [],
@@ -62,6 +65,9 @@
         },
         {
             "m_Id": "4c3c4846f1754110a879cc582a3391cb"
+        },
+        {
+            "m_Id": "de763c6426874da79a089f23d754d973"
         }
     ],
     "m_GroupDatas": [],
@@ -133,6 +139,20 @@
             "m_InputSlot": {
                 "m_Node": {
                     "m_Id": "23ca88f7dfdb452791a36187711cb6d5"
+                },
+                "m_SlotId": 1
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
+                    "m_Id": "de763c6426874da79a089f23d754d973"
+                },
+                "m_SlotId": 0
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "461dd9a22b214ba0acfce1c9e7a3f615"
                 },
                 "m_SlotId": 1
             }
@@ -704,6 +724,19 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Texture2DMaterialSlot",
+    "m_ObjectId": "4d51acf11df947d29afe0f1463831739",
+    "m_Id": 0,
+    "m_DisplayName": "Fondo",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_BareResource": false
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "51cfe1425a4a4130820e3e7ebf0540bc",
     "m_Id": 6,
@@ -876,8 +909,48 @@
         },
         {
             "m_Id": "14e0e5c484b54a52bb4d9e5d67ba24d2"
+        },
+        {
+            "m_Id": "7dfc26d923544721a551f7ffdd9ad83b"
         }
     ]
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty",
+    "m_ObjectId": "7dfc26d923544721a551f7ffdd9ad83b",
+    "m_Guid": {
+        "m_GuidSerialized": "c266d8ef-8408-4b4a-9a4a-f21d94764ac0"
+    },
+    "promotedFromAssetID": "",
+    "promotedFromCategoryName": "",
+    "promotedOrdering": -1,
+    "m_Name": "Fondo",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Fondo",
+    "m_DefaultReferenceName": "_Fondo",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_PerRendererData": false,
+    "m_customAttributes": [],
+    "m_Value": {
+        "m_SerializedTexture": "",
+        "m_Guid": ""
+    },
+    "isMainTexture": false,
+    "useTilingAndOffset": false,
+    "useTexelSize": true,
+    "isHDR": false,
+    "m_Modifiable": true,
+    "m_DefaultType": 0
 }
 
 {
@@ -1366,6 +1439,42 @@
         "m_SerializableColors": []
     },
     "m_SerializedDescriptor": "SurfaceDescription.BaseColor"
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.PropertyNode",
+    "m_ObjectId": "de763c6426874da79a089f23d754d973",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Property",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -1329.9998779296875,
+            "y": 371.9999694824219,
+            "width": 117.0,
+            "height": 34.0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "4d51acf11df947d29afe0f1463831739"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Property": {
+        "m_Id": "7dfc26d923544721a551f7ffdd9ad83b"
+    }
 }
 
 {

@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81b5cdbb2d6a400489b3b4e1ca9ebe8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  detectionRange: 30
+  detectionRange: 10
   prepareDuration: 1
   throwDuration: 0.15
   recoveryDuration: 0.5

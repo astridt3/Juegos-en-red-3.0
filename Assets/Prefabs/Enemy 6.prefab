@@ -140,7 +140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8849708e5da9f5f458d059034d315b5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SniperEnemy
-  detectionRange: 30
+  detectionRange: 10
   aimDuration: 0.75
   reloadDuration: 1
   aimLineLength: 10
