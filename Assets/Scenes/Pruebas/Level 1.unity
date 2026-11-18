@@ -298,7 +298,7 @@ MonoBehaviour:
     RawGuidValue: 86e1fe6fb1b6521459d716a5ed767383
   mainCamera: {fileID: 738345189}
   spawnHeight: 2
-  maxSpawns: 2
+  maxSpawns: 5
   firstSpawnTime: 20
   spawnInterval: 35
 --- !u!4 &134938938
