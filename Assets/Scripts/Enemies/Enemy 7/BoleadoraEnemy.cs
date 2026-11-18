@@ -146,7 +146,7 @@ public class BoleadoraEnemy : NetworkBehaviour
             if (playerObject == null)
                 continue;
 
-            Player player = playerObject.GetComponent<Player>();
+            Player player = playerObject.GetComponentInChildren<Player>();
 
             if (player == null || !player.IsAlive)
                 continue;
@@ -181,7 +181,7 @@ public class BoleadoraEnemy : NetworkBehaviour
         if (target == null)
             return false;
 
-        Player player = target.GetComponent<Player>();
+        Player player = target.GetComponentInChildren<Player>();
 
         if (player == null || !player.IsAlive)
             return false;
@@ -260,8 +260,15 @@ public class BoleadoraEnemy : NetworkBehaviour
 
         Player player = collision.collider.GetComponentInParent<Player>();
 
-        if (player != null && player.IsAlive)
-            player.Kill();
+        if (player == null)
+            player = collision.gameObject.GetComponentInParent<Player>();
+
+        if (player == null || !player.IsAlive)
+            return;
+
+        Debug.Log("BoleadoraEnemy chocó con un jugador.");
+
+        player.Kill();
     }
 
     private void Die()

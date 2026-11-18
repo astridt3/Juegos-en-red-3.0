@@ -72,18 +72,18 @@ public class BoleadoraProjectile : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        Player player = collision.GetComponent<Player>();
+        Player player = collision.GetComponentInParent<Player>();
 
         if (player == null)
-            player = collision.GetComponentInParent<Player>();
+            player = collision.GetComponentInChildren<Player>();
 
-        if (player == null)
+        if (player == null || !player.IsAlive)
             return;
 
-        if (player.IsAlive)
-            player.ApplyKnockback(Direction, pushForce);
+        Debug.Log("BoleadoraProjectile golpeó a un jugador.");
+
+        player.ApplyKnockback(Direction, pushForce);
 
         Runner.Despawn(Object);
     }
-
 }
