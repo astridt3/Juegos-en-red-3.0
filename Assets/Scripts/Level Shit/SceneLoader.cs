@@ -1,5 +1,5 @@
-using UnityEngine;
 using Fusion;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
@@ -16,15 +16,15 @@ public class SceneLoader : MonoBehaviour
         return runner;
     }
 
-    public void CargarEscena1() => CargarEscena(1);
-    public void CargarEscena2() => CargarEscena(2);
-    public void CargarEscena3() => CargarEscena(3);
+    public void CargarEscena1() => CargarEscena("Level 1");
+    public void CargarEscena2() => CargarEscena("Level 2");
+    public void CargarEscena3() => CargarEscena("Level 3");
 
-    private void CargarEscena(int sceneIndex)
+    private void CargarEscena(string sceneName)
     {
         NetworkRunner activeRunner = GetRunner();
 
-        if (activeRunner == null)
+        if (activeRunner == null || !activeRunner.IsRunning)
         {
             Debug.LogError("No se encontró ningún NetworkRunner activo.");
             return;
@@ -36,7 +36,7 @@ public class SceneLoader : MonoBehaviour
             return;
         }
 
-        Debug.Log("Cargando nivel " + sceneIndex);
-        activeRunner.LoadScene(SceneRef.FromIndex(sceneIndex), LoadSceneMode.Single);
+        Debug.Log("Cargando escena: " + sceneName);
+        activeRunner.LoadScene(sceneName, LoadSceneMode.Single);
     }
 }

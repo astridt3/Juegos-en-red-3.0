@@ -2,6 +2,7 @@ using Fusion;
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : NetworkBehaviour
@@ -247,37 +248,19 @@ public class GameManager : NetworkBehaviour
     }
 
 
-    public void RestartLevel1()
+    public void RestartCurrentLevel()
     {
-        RestartLevel1Rpc();
+        RestartCurrentLevelRpc();
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void RestartLevel1Rpc()
+    private void RestartCurrentLevelRpc()
     {
-        Debug.Log("Reiniciando nivel 1.");
+        string currentScene = SceneManager.GetActiveScene().name;
 
-        Runner.LoadScene(SceneRef.FromIndex(1));
-    }
-    public void RestartLevel2()
-    {
-        RestartLevel2Rpc();
-    }
-    private void RestartLevel2Rpc()
-    {
-        Debug.Log("Reiniciando nivel 2.");
+        Debug.Log("Reiniciando nivel: " + currentScene);
 
-        Runner.LoadScene(SceneRef.FromIndex(2));
-    }
-    public void RestartLevel3()
-    {
-        RestartLevel3Rpc();
-    }
-    private void RestartLevel3Rpc()
-    {
-        Debug.Log("Reiniciando nivel 3.");
-
-        Runner.LoadScene(SceneRef.FromIndex(3));
+        Runner.LoadScene(currentScene, LoadSceneMode.Single);
     }
 
     public void ReturnToTeamSelection()

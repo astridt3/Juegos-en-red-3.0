@@ -738,7 +738,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e268e5cb8e6d2b849a7097b44495e2db, type: 2}
+  - {fileID: 2100000, guid: 9c1552983bd55a5428d4a42c5ca8d1b1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2535,7 +2535,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1940116923}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: RestartLevel1
+        m_MethodName: RestartCurrentLevel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
