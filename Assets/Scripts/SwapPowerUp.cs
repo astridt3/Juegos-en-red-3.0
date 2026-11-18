@@ -11,6 +11,8 @@ public class SwapPowerUp : NetworkBehaviour
     private Rigidbody2D rb;
     private float lifeTimer;
 
+
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -79,12 +81,29 @@ public class SwapPowerUp : NetworkBehaviour
 
         Player target = players[Random.Range(0, players.Count)];
 
-        Vector3 playerPosition = player.transform.position;
-        Vector3 targetPosition = target.transform.position;
 
-        player.transform.position = targetPosition;
-        target.transform.position = playerPosition;
+        // Activar niebla solamente en los dos jugadores involucrados
 
-        Runner.Despawn(Object);
+        SwapFogReceiver playerFog = player.GetComponent<SwapFogReceiver>();
+        SwapFogReceiver targetFog = target.GetComponent<SwapFogReceiver>();
+
+        if (playerFog != null)
+        {
+            playerFog.RPC_ShowFog(player.Object.InputAuthority);
+        }
+        else
+        {
+            Debug.LogWarning("El jugador que recogió el power-up no tiene SwapFogReceiver.");
+        }
+
+        if (targetFog != null)
+        {
+            targetFog.RPC_ShowFog(target.Object.InputAuthority);
+        }
+        else
+        {
+            Debug.LogWarning("El jugador objetivo no tiene SwapFogReceiver.");
+        }
     }
 }
+
