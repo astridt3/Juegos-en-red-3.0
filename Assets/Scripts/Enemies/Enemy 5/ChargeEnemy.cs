@@ -54,7 +54,6 @@ public class ChargeEnemy : NetworkBehaviour
         StartWaiting();
     }
 
-
     public override void FixedUpdateNetwork()
     {
         if (!Object.HasStateAuthority)
@@ -65,13 +64,11 @@ public class ChargeEnemy : NetworkBehaviour
         if (!dashing)
         {
             rb.linearVelocity = Vector2.zero;
-            
+
             hasTarget = TryGetClosestPlayerPosition(out targetPosition);
 
             if (timer <= 0f)
-            {
                 StartDash();
-            }
         }
         else
         {
@@ -93,7 +90,6 @@ public class ChargeEnemy : NetworkBehaviour
         }
     }
 
-
     private void StartWaiting()
     {
         dashing = false;
@@ -102,11 +98,9 @@ public class ChargeEnemy : NetworkBehaviour
         IsDashing = false;
 
         rb.linearVelocity = Vector2.zero;
-
         timer = waitDuration;
 
         hasTarget = TryGetClosestPlayerPosition(out targetPosition);
-
     }
 
     private void StartDash()
@@ -151,13 +145,12 @@ public class ChargeEnemy : NetworkBehaviour
             if (playerObject == null)
                 continue;
 
-            Player player = playerObject.GetComponent<Player>();
+            Player player = playerObject.GetComponentInChildren<Player>();
 
             if (player == null || !player.IsAlive)
                 continue;
 
-            Vector2 position = playerObject.transform.position;
-
+            Vector2 position = player.transform.position;
             float distance = (position - rb.position).sqrMagnitude;
 
             if (distance < closestDistance)
@@ -187,10 +180,19 @@ public class ChargeEnemy : NetworkBehaviour
         if (!Object.HasStateAuthority || !dashing)
             return;
 
-        Player player = collision.gameObject.GetComponentInParent<Player>();
+        Player player = collision.collider.GetComponentInParent<Player>();
 
-        if (player != null && player.IsAlive)
-            player.Kill();
+        if (player == null)
+            player = collision.gameObject.GetComponentInParent<Player>();
+
+        if (player == null || !player.IsAlive)
+            return;
+
+        Debug.Log("ChargeEnemy golpeó a un jugador.");
+
+        player.Kill();
+
+        StartWaiting();
     }
 
     private void Die()
