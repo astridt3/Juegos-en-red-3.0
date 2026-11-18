@@ -18,9 +18,17 @@ public class SwordAura : MonoBehaviour
     [SerializeField] private float pulseSpeed = 4f;
     [SerializeField] private float irregularity = 0.045f;
 
+    [Header("Fire Particles")]
+    [SerializeField] private int particleAmount = 35;
+    [SerializeField] private float particleHeight = 0.8f;
+    [SerializeField] private float particleSpeed = 1.5f;
+    [SerializeField] private float particleSize = 0.12f;
+
     private LineRenderer outerRing;
     private LineRenderer innerRing;
     private LineRenderer hotRing;
+
+    private ParticleSystem fireParticles;
 
     private bool activeAura;
 
@@ -29,6 +37,8 @@ public class SwordAura : MonoBehaviour
         outerRing = CreateRing("Outer Lava", thickness * 2f, lavaRed, 0);
         innerRing = CreateRing("Lava Ring", thickness, lavaOrange, 1);
         hotRing = CreateRing("Hot Lava", thickness * 0.3f, lavaYellow, 2);
+
+        CreateFireParticles();
 
         ActivateAura(false);
     }
@@ -56,6 +66,76 @@ public class SwordAura : MonoBehaviour
         return ring;
     }
 
+    private void CreateFireParticles()
+    {
+        GameObject fire = new GameObject("Fire Particles");
+        fire.transform.SetParent(transform, false);
+        fire.transform.localPosition = Vector3.zero;
+
+        fireParticles = fire.AddComponent<ParticleSystem>();
+
+        var main = fireParticles.main;
+        main.loop = true;
+        main.playOnAwake = false;
+        main.duration = 5f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.4f, 0.9f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(particleSpeed * 0.5f, particleSpeed);
+        main.startSize = new ParticleSystem.MinMaxCurve(particleSize * 0.5f, particleSize);
+        main.startColor = Color.white;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.maxParticles = particleAmount * 3;
+
+        var emission = fireParticles.emission;
+        emission.rateOverTime = particleAmount;
+
+        var shape = fireParticles.shape;
+        shape.enabled = true;
+        shape.shapeType = ParticleSystemShapeType.Circle;
+        shape.radius = radius;
+
+        var velocity = fireParticles.velocityOverLifetime;
+        velocity.enabled = true;
+        velocity.y = new ParticleSystem.MinMaxCurve(0.5f, particleHeight);
+
+        var color = fireParticles.colorOverLifetime;
+        color.enabled = true;
+
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[]
+            {
+                new GradientColorKey(lavaYellow, 0f),
+                new GradientColorKey(lavaOrange, 0.4f),
+                new GradientColorKey(lavaRed, 1f)
+            },
+            new GradientAlphaKey[]
+            {
+                new GradientAlphaKey(0.9f, 0f),
+                new GradientAlphaKey(0.8f, 0.3f),
+                new GradientAlphaKey(0f, 1f)
+            }
+        );
+
+        color.color = gradient;
+
+        var size = fireParticles.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(
+            1f,
+            new AnimationCurve(
+                new Keyframe(0f, 0.5f),
+                new Keyframe(0.3f, 1.2f),
+                new Keyframe(1f, 0f)
+            )
+        );
+
+        var renderer = fireParticles.GetComponent<ParticleSystemRenderer>();
+        renderer.sortingOrder = 15;
+        renderer.material = new Material(Shader.Find("Sprites/Default"));
+
+        fireParticles.Play();
+    }
+
     private void Update()
     {
         if (!activeAura)
@@ -73,10 +153,11 @@ public class SwordAura : MonoBehaviour
 
             float currentRadius = radius + wave + wave2 + pulse;
 
-            float x = Mathf.Cos(angle) * currentRadius;
-            float y = Mathf.Sin(angle) * currentRadius * 0.35f;
-
-            Vector3 position = new Vector3(x, y, 0);
+            Vector3 position = new Vector3(
+                Mathf.Cos(angle) * currentRadius,
+                Mathf.Sin(angle) * currentRadius * 0.35f,
+                0
+            );
 
             outerRing.SetPosition(i, position);
             innerRing.SetPosition(i, position);
@@ -102,5 +183,13 @@ public class SwordAura : MonoBehaviour
         if (outerRing != null) outerRing.enabled = active;
         if (innerRing != null) innerRing.enabled = active;
         if (hotRing != null) hotRing.enabled = active;
+
+        if (fireParticles != null)
+        {
+            if (active)
+                fireParticles.Play();
+            else
+                fireParticles.Stop();
+        }
     }
 }
