@@ -794,8 +794,8 @@ MonoBehaviour:
   speed: 5
   bluePlayer: {fileID: 3733580206948847258}
   redPlayer: {fileID: 803669516638578399}
-  team1Color: {r: 0.3915094, g: 0.3915094, b: 1, a: 1}
-  team2Color: {r: 1, g: 0.4481132, b: 0.4481132, a: 1}
+  team1Color: {r: 0.8254717, g: 0.8254717, b: 1, a: 1}
+  team2Color: {r: 1, g: 0.7783019, b: 0.7783019, a: 1}
   indicator: {fileID: 6147906051137022004}
   powerUpDuration: 5
   knockbackDeceleration: 15
