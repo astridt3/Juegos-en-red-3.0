@@ -73,16 +73,17 @@ public class SniperProjectile : NetworkBehaviour
         if (!Object.HasStateAuthority)
             return;
 
-        Player player = collision.GetComponent<Player>();
+        Player player = collision.GetComponentInParent<Player>();
 
         if (player == null)
-            player = collision.GetComponentInParent<Player>();
+            player = collision.GetComponentInChildren<Player>();
 
-        if (player == null)
+        if (player == null || !player.IsAlive)
             return;
 
-        if (player.IsAlive)
-            player.Kill();
+        Debug.Log("SniperProjectile golpeó a un jugador.");
+
+        player.Kill();
 
         Runner.Despawn(Object);
     }
