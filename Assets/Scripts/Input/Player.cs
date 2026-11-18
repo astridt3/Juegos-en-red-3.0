@@ -17,6 +17,7 @@ public class Player : NetworkBehaviour
     [SerializeField] private GameObject indicator;
 
     [SerializeField] private NetworkPrefabRef bloodPrefab;
+    [SerializeField] private SwordAura swordAura;
 
     private SpriteRenderer blueSpriteRenderer;
     private SpriteRenderer redSpriteRenderer;
@@ -160,6 +161,7 @@ public class Player : NetworkBehaviour
             Runner.SimulationTime >= PowerUpEndTime)
         {
             CanPvp = false;
+            swordAura.ActivateAura(false);
             Debug.Log("Power Up terminado");
         }
 
@@ -262,6 +264,7 @@ public class Player : NetworkBehaviour
             return;
 
         CanPvp = true;
+        swordAura.ActivateAura(true);
 
         PowerUpEndTime = Runner.SimulationTime + powerUpDuration;
 
