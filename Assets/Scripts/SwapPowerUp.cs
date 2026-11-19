@@ -67,7 +67,13 @@ public class SwapPowerUp : NetworkBehaviour
 
             Player otherPlayer = playerObject.GetComponent<Player>();
 
-            if (otherPlayer == null || !otherPlayer.IsAlive || otherPlayer == player)
+            if (otherPlayer == null || !otherPlayer.IsAlive)
+                continue;
+
+            if (otherPlayer.Team == player.Team)
+                continue;
+
+            if (otherPlayer == player)
                 continue;
 
             players.Add(otherPlayer);
@@ -75,35 +81,33 @@ public class SwapPowerUp : NetworkBehaviour
 
         if (players.Count == 0)
         {
+            Debug.Log("No hay jugadores vivos del equipo contrario.");
             Runner.Despawn(Object);
             return;
         }
 
+
         Player target = players[Random.Range(0, players.Count)];
 
+        Vector3 playerPosition = player.transform.position;
+        Vector3 targetPosition = target.transform.position;
 
-        // Activar niebla solamente en los dos jugadores involucrados
+        player.transform.position = targetPosition;
+        target.transform.position = playerPosition;
+
+        Debug.Log("¡Se intercambiaron las posiciones entre los equipos!");
+
 
         SwapFogReceiver playerFog = player.GetComponent<SwapFogReceiver>();
         SwapFogReceiver targetFog = target.GetComponent<SwapFogReceiver>();
 
         if (playerFog != null)
-        {
             playerFog.RPC_ShowFog(player.Object.InputAuthority);
-        }
-        else
-        {
-            Debug.LogWarning("El jugador que recogió el power-up no tiene SwapFogReceiver.");
-        }
 
         if (targetFog != null)
-        {
             targetFog.RPC_ShowFog(target.Object.InputAuthority);
-        }
-        else
-        {
-            Debug.LogWarning("El jugador objetivo no tiene SwapFogReceiver.");
-        }
+
+        Runner.Despawn(Object);
     }
 }
 
