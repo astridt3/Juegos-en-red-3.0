@@ -3,10 +3,9 @@ using Fusion.Sockets;
 using Photon.Voice.Fusion;
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Threading.Tasks;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -42,47 +41,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         runner.AddCallbacks(this);
         inputSystemActions = new InputSystemActions();
-        NetworkRunner.CloudConnectionLost += OnCloudConnectionLost;
-    }
-    private void OnDestroy()
-    {
-        NetworkRunner.CloudConnectionLost -= OnCloudConnectionLost;
-    }
-
-    private void OnCloudConnectionLost(
-        NetworkRunner lostRunner,
-        ShutdownReason reason,
-        bool reconnecting)
-    {
-        if (lostRunner != runner)
-            return;
-
-        if (reconnecting)
-        {
-            Debug.LogWarning(
-                "¡Se perdió la conexión! Intentando reconectar..."
-            );
-        }
-        else
-        {
-            Debug.LogError(
-                "No se pudo reconectar. Motivo: " + reason
-            );
-        }
-    }
-    private byte[] GetConnectionToken()
-    {
-        string playerID = PlayerPrefs.GetString("FusionPlayerID", "");
-
-        if (string.IsNullOrEmpty(playerID))
-        {
-            playerID = Guid.NewGuid().ToString("N");
-
-            PlayerPrefs.SetString("FusionPlayerID", playerID);
-            PlayerPrefs.Save();
-        }
-
-        return Encoding.UTF8.GetBytes(playerID);
     }
 
     private void OnEnable()
@@ -155,8 +113,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             PlayerCount = 4,
             Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
             SceneManager = sceneManager,
-            ObjectProvider = objectProvider,
-            ConnectionToken = GetConnectionToken()
+            ObjectProvider = objectProvider
         });
 
         if (!result.Ok)
@@ -182,8 +139,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             MatchmakingMode = Photon.Realtime.MatchmakingMode.FillRoom,
             Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
             SceneManager = sceneManager,
-            ObjectProvider = objectProvider,
-            ConnectionToken = GetConnectionToken()
+            ObjectProvider = objectProvider
         });
 
         if (!result.Ok)
@@ -201,46 +157,13 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (!runner.IsServer)
-            return;
-
-        TeamManager teamManager = TeamManager.Instance;
-
-        byte[] token = runner.GetPlayerConnectionToken(player);
-
-        bool reconnected = false;
-
-        if (token != null && teamManager != null)
+        if (runner.IsServer)
         {
-            string playerID = Encoding.UTF8.GetString(token);
+            NetworkObject playerObject = runner.Spawn(playerPrefab, Vector3.zero, Quaternion.identity, player);
 
-            reconnected = teamManager.RestoreDisconnectedPlayer(
-                player,
-                playerID
-            );
-        }
+            runner.SetPlayerObject(player, playerObject);
 
-        NetworkObject playerObject = runner.Spawn(
-            playerPrefab,
-            Vector3.zero,
-            Quaternion.identity,
-            player
-        );
-
-        runner.SetPlayerObject(player, playerObject);
-
-        Player playerComponent = playerObject.GetComponent<Player>();
-
-        if (reconnected && playerComponent != null)
-        {
-            playerComponent.Team = (byte)teamManager.GetPlayerTeam(player);
-            playerComponent.IsAlive = true;
-
-            Debug.Log("¡Jugador reconectado! Recuperó su equipo.");
-        }
-        else
-        {
-            Debug.Log("Nuevo jugador conectado.");
+            Debug.Log("Player " + player + " spawneado y asignado correctamente.");
         }
     }
 
@@ -251,26 +174,30 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         Debug.Log("Jugador desconectado: " + player);
 
-        byte[] token = runner.GetPlayerConnectionToken(player);
 
-        TeamManager teamManager = TeamManager.Instance;
+        TeamManager teamManager = FindFirstObjectByType<TeamManager>();
 
-        if (token != null && teamManager != null)
+        if (teamManager != null)
         {
-            string playerID = Encoding.UTF8.GetString(token);
-
-            teamManager.RememberDisconnectedPlayer(player, playerID);
+            teamManager.RemoveDisconnectedPlayer(player);
         }
+
 
         NetworkObject playerObject = runner.GetPlayerObject(player);
 
         if (playerObject != null)
         {
+            Debug.Log("Despawneando personaje de " + player);
+
             runner.Despawn(playerObject);
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró PlayerObject para " + player);
         }
     }
 
-    // Advertencias de OnConnectedToServer y OnDisconnectedFromServer silenciadas
+// Advertencias de OnConnectedToServer y OnDisconnectedFromServer silenciadas
 #pragma warning disable UNT0006 // Incorrect message signature
     public void OnConnectedToServer(NetworkRunner runner)
     {
