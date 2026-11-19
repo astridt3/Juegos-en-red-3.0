@@ -1,4 +1,5 @@
 using Fusion;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TeamManager : NetworkBehaviour
@@ -14,7 +15,8 @@ public class TeamManager : NetworkBehaviour
     [Networked] private NetworkBool AllTeamsFull { get; set; }
 
     public bool IsNetworkReady { get; private set; }
-
+    private Dictionary<string, PlayerRef> disconnectedPlayers =
+    new Dictionary<string, PlayerRef>();
     private void Awake()
     {
         if (instance != null && instance != this)
@@ -31,7 +33,41 @@ public class TeamManager : NetworkBehaviour
         if (instance == this)
             instance = null;
     }
+    public void RememberDisconnectedPlayer(PlayerRef player, string playerID)
+    {
+        if (!Object.HasStateAuthority || string.IsNullOrEmpty(playerID))
+            return;
 
+        disconnectedPlayers[playerID] = player;
+
+        Debug.Log("Jugador guardado para reconexión: " + playerID);
+    }
+
+    public bool RestoreDisconnectedPlayer(PlayerRef newPlayer, string playerID)
+    {
+        if (!Object.HasStateAuthority)
+            return false;
+
+        if (!disconnectedPlayers.TryGetValue(playerID, out PlayerRef oldPlayer))
+            return false;
+
+        if (Team1Slot1 == oldPlayer)
+            Team1Slot1 = newPlayer;
+        else if (Team1Slot2 == oldPlayer)
+            Team1Slot2 = newPlayer;
+        else if (Team2Slot1 == oldPlayer)
+            Team2Slot1 = newPlayer;
+        else if (Team2Slot2 == oldPlayer)
+            Team2Slot2 = newPlayer;
+        else
+            return false;
+
+        disconnectedPlayers.Remove(playerID);
+
+        Debug.Log("Jugador recuperó su lugar en el equipo.");
+
+        return true;
+    }
     public override void Spawned()
     {
         IsNetworkReady = true;
